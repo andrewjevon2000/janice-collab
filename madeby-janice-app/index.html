@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#c2603e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Janice Collab">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>@madeby.janice — Collab Scheduler</title>
+<style>
+  :root{
+    --bg:#faf7f2; --card:#ffffff; --ink:#2d2a26; --muted:#8a8175;
+    --accent:#c2603e; --accent-soft:#f6e3d9; --line:#ece5da;
+    --green:#3d8b5f; --green-soft:#e2f2e8;
+    --blue:#3f6fae; --blue-soft:#e3ecf8;
+    --orange:#d07f2c; --orange-soft:#faeeda;
+    --red:#c04545; --red-soft:#fae3e3;
+    --purple:#7b5ea7; --purple-soft:#ede6f7;
+    --gray:#7d7d7d; --gray-soft:#eeeceb;
+    --radius:12px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{overscroll-behavior-y:contain}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;
+       padding:16px calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+       padding-top:calc(16px + env(safe-area-inset-top))}
+  header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+  header h1{font-size:20px;font-weight:700}
+  header h1 span{color:var(--accent)}
+  header .sub{color:var(--muted);font-size:12.5px;margin-top:2px}
+  .hbtns{display:flex;gap:6px;flex-wrap:wrap}
+  .btn{border:none;border-radius:8px;padding:9px 13px;font-size:13px;font-weight:600;cursor:pointer;background:var(--gray-soft);color:var(--ink);transition:.15s}
+  .btn:hover{filter:brightness(.95)} .btn:active{transform:scale(.97)}
+  .btn.primary{background:var(--accent);color:#fff}
+  .btn.ghost{background:transparent;border:1px solid var(--line)}
+  .btn.small{padding:6px 10px;font-size:12px}
+  /* sync chip */
+  .syncbar{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:8px 12px;margin-bottom:12px;font-size:12.5px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--gray);flex:none}
+  .dot.on{background:var(--green)} .dot.off{background:var(--red)} .dot.sync{background:var(--orange);animation:pulse 1s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .syncbar .grow{flex:1;color:var(--muted)}
+  /* dashboard */
+  .dash{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+  .stat .label{font-size:11.5px;color:var(--muted);margin-bottom:5px}
+  .stat .value{font-size:21px;font-weight:700}
+  .stat .value.warn{color:var(--red)}
+  .stat .value.money{color:var(--green);font-size:17px}
+  /* quick add */
+  .quickadd{display:flex;gap:8px;margin-bottom:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:9px}
+  .quickadd input{flex:1;border:none;outline:none;font-size:14px;background:transparent;color:var(--ink);min-width:0}
+  /* toolbar */
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .toolbar input[type=search],.toolbar select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;background:var(--card);color:var(--ink)}
+  .toolbar input[type=search]{flex:1;min-width:150px}
+  .spacer{flex:1}
+  .viewtoggle{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .viewtoggle button{border:none;padding:8px 13px;background:var(--card);cursor:pointer;font-size:13px;font-weight:600;color:var(--muted)}
+  .viewtoggle button.active{background:var(--accent);color:#fff}
+  /* table */
+  .tablewrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;min-width:1180px}
+  th{position:sticky;top:0;background:#f3ede4;text-align:left;padding:10px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap;z-index:1}
+  td{padding:10px;border-top:1px solid var(--line);vertical-align:top;white-space:nowrap}
+  td.wrap{white-space:normal;min-width:150px;max-width:230px}
+  tbody tr:active{background:#fdf9f4} tbody tr:hover{background:#fdf9f4;cursor:pointer}
+  .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
+  .chip{display:inline-block;background:var(--gray-soft);border-radius:6px;padding:2px 7px;font-size:11px;margin:1px 2px 1px 0}
+  .datecell{display:flex;flex-direction:column;gap:2px}
+  .flag{font-size:10.5px;font-weight:700;border-radius:5px;padding:1px 6px;display:inline-block;width:fit-content}
+  .flag.late{background:var(--red-soft);color:var(--red)}
+  .flag.soon{background:var(--orange-soft);color:var(--orange)}
+  .links a{text-decoration:none;font-size:12px;margin-right:6px;color:var(--blue)}
+  .fee{font-weight:600}
+  .empty{text-align:center;padding:36px 16px;color:var(--muted)}
+  /* cards (mobile) */
+  .cards{display:none;flex-direction:column;gap:10px}
+  .ccard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:13px}
+  .ccard .top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:6px}
+  .ccard .brand{font-weight:700;font-size:15px}
+  .ccard .meta{color:var(--muted);font-size:12px;margin-bottom:8px}
+  .ccard .dts{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-bottom:8px}
+  .ccard .dts b{color:var(--muted);font-weight:600}
+  .ccard .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+  /* calendar */
+  .calwrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:none}
+  .calhead{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+  .calhead h2{font-size:15px;min-width:150px;text-align:center}
+  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .caldow{text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;padding:4px 0;text-transform:uppercase}
+  .calcell{min-height:74px;border:1px solid var(--line);border-radius:8px;padding:4px;font-size:10.5px;background:#fffdf9}
+  .calcell.other{opacity:.35}
+  .calcell.today{border-color:var(--accent);border-width:2px}
+  .calcell .d{font-weight:700;margin-bottom:2px}
+  .evt{border-radius:5px;padding:2px 4px;margin-bottom:2px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+  .evt.masak{background:var(--orange-soft);color:var(--orange)}
+  .evt.draft{background:var(--blue-soft);color:var(--blue)}
+  .evt.posting{background:var(--green-soft);color:var(--green)}
+  .legend{display:flex;gap:12px;justify-content:center;margin-top:12px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .legend .evt{display:inline-block;margin:0 4px 0 0}
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(45,42,38,.45);display:none;align-items:flex-start;justify-content:center;padding:20px 12px;overflow:auto;z-index:50}
+  .overlay.open{display:flex}
+  .modal{background:var(--card);border-radius:14px;width:100%;max-width:680px;padding:20px;margin-bottom:40px}
+  .modal h2{font-size:16px;margin-bottom:14px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .field{display:flex;flex-direction:column;gap:4px;margin-bottom:12px}
+  .field label{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+  .field input,.field select,.field textarea{border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-size:15px;font-family:inherit;background:#fff;color:var(--ink)}
+  .field textarea{resize:vertical;min-height:54px}
+  .checks{display:flex;flex-wrap:wrap;gap:6px}
+  .checks label{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:13px;cursor:pointer;user-select:none}
+  .checks label:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+  .checks input{display:none}
+  .modalfoot{display:flex;justify-content:space-between;margin-top:6px;gap:8px}
+  .modalfoot .right{display:flex;gap:8px}
+  .note{font-size:12px;color:var(--muted);line-height:1.5}
+  .note code{background:var(--gray-soft);padding:1px 5px;border-radius:4px;font-size:11.5px}
+  @media(max-width:760px){
+    .grid2,.grid4{grid-template-columns:1fr}
+    .tablewrap{display:none}
+    .cards{display:flex}
+    header h1{font-size:18px}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>🍳 <span>@madeby.janice</span></h1>
+    <div class="sub">Collab Scheduler — masak · draft · posting · payment</div>
+  </div>
+  <div class="hbtns">
+    <button class="btn ghost small" onclick="openSettings()">☁️ Cloud</button>
+    <button class="btn ghost small" onclick="exportCSV()">⬇ CSV</button>
+    <button class="btn primary" onclick="openModal()">＋ Collab</button>
+  </div>
+</header>
+
+<div class="syncbar">
+  <span class="dot" id="syncDot"></span>
+  <span class="grow" id="syncText">Cloud belum diatur — data tersimpan lokal di perangkat ini.</span>
+  <button class="btn small" id="syncBtn" onclick="syncNow()" style="display:none">🔄 Sync</button>
+</div>
+
+<div class="dash" id="dash"></div>
+
+<div class="quickadd">
+  <span style="align-self:center">⚡</span>
+  <input id="qa" placeholder='Contoh: "Besok collab Kecap ABC, masak Chicken Katsu, draft tanggal 20, posting 23, fee 2jt"' onkeydown="if(event.key==='Enter')quickAdd()">
+  <button class="btn primary small" onclick="quickAdd()">Isi</button>
+</div>
+
+<div class="toolbar">
+  <input type="search" id="fSearch" placeholder="🔍 Cari brand / menu…" oninput="render()">
+  <select id="fBrand" onchange="render()"><option value="">Semua Brand</option></select>
+  <select id="fStatus" onchange="render()"><option value="">Semua Status</option></select>
+  <select id="fMonth" onchange="render()"><option value="">Semua Bulan</option></select>
+  <div class="spacer"></div>
+  <div class="viewtoggle">
+    <button id="btnTable" class="active" onclick="setView('table')">☰ Tabel</button>
+    <button id="btnCal" onclick="setView('cal')">📅 Kalender</button>
+  </div>
+</div>
+
+<div class="tablewrap" id="tableView">
+  <table>
+    <thead><tr>
+      <th>Tanggal</th><th>Brand</th><th>Jenis</th><th>Produk &amp; KSP</th><th>Menu</th>
+      <th>Deliverables</th><th>🍳 Masak</th><th>📤 Draft</th><th>✅ Approval</th><th>📱 Posting</th>
+      <th>Status</th><th>Fee</th><th>Bayar</th><th>Link</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+<div class="cards" id="cardsView"></div>
+<div class="empty" id="emptyMsg" style="display:none">Belum ada collab. Tap <b>＋ Collab</b> atau pakai Quick Add.</div>
+
+<div class="calwrap" id="calView">
+  <div class="calhead">
+    <button class="btn small" onclick="calShift(-1)">‹</button>
+    <h2 id="calTitle"></h2>
+    <button class="btn small" onclick="calShift(1)">›</button>
+    <button class="btn small ghost" onclick="calToday()">Hari ini</button>
+  </div>
+  <div class="calgrid" id="calGrid"></div>
+  <div class="legend">
+    <span><span class="evt masak">🍳</span>Masak</span>
+    <span><span class="evt draft">📤</span>Draft</span>
+    <span><span class="evt posting">📱</span>Posting</span>
+  </div>
+</div>
+
+<!-- Collab modal -->
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h2 id="modalTitle">Tambah Collab</h2>
+    <input type="hidden" id="m_id">
+    <div class="grid2">
+      <div class="field"><label>Tanggal (deal/mulai)</label><input type="date" id="m_tanggal"></div>
+      <div class="field"><label>Brand</label><input id="m_brand" list="brandList" placeholder="Nama brand"><datalist id="brandList"></datalist></div>
+      <div class="field"><label>Jenis Collab</label><input id="m_jenis" list="jenisList" placeholder="Paid Promote / Barter / …"><datalist id="jenisList">
+        <option>Paid Promote</option><option>Barter Produk</option><option>Endorsement</option><option>Affiliate</option><option>Brand Ambassador</option><option>Event / Cooking Demo</option>
+      </datalist></div>
+      <div class="field"><label>Produk</label><input id="m_produk" placeholder="Produk yang di-highlight"></div>
+    </div>
+    <div class="field"><label>KSP / Key Selling Point</label><textarea id="m_ksp" placeholder="Poin utama yang wajib disebut"></textarea></div>
+    <div class="grid2">
+      <div class="field"><label>Menu</label><input id="m_menu" placeholder="Menu yang dimasak"></div>
+      <div class="field"><label>Status</label><select id="m_status"></select></div>
+    </div>
+    <div class="field"><label>Deliverables</label><div class="checks" id="m_deliv"></div></div>
+    <div class="grid4">
+      <div class="field"><label>🍳 Tgl Masak</label><input type="date" id="m_masak"></div>
+      <div class="field"><label>📤 Kirim Draft</label><input type="date" id="m_draft"></div>
+      <div class="field"><label>✅ Approval</label><input type="date" id="m_approval"></div>
+      <div class="field"><label>📱 Posting</label><input type="date" id="m_posting"></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Fee (Rp)</label><input type="number" inputmode="numeric" id="m_fee" min="0" step="50000" placeholder="0"></div>
+      <div class="field"><label>Status Pembayaran</label><select id="m_bayar"></select></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Link Brief</label><input type="url" id="m_lbrief" placeholder="https://…"></div>
+      <div class="field"><label>Link Draft</label><input type="url" id="m_ldraft" placeholder="https://…"></div>
+    </div>
+    <div class="field"><label>Link Posting</label><input type="url" id="m_lpost" placeholder="https://…"></div>
+    <div class="field"><label>Catatan</label><textarea id="m_catatan" placeholder="Revisi, kontak PIC, dll."></textarea></div>
+    <div class="modalfoot">
+      <button class="btn" id="btnDelete" style="background:var(--red-soft);color:var(--red)" onclick="deleteRow()">Hapus</button>
+      <div class="right">
+        <button class="btn ghost" onclick="closeModal()">Batal</button>
+        <button class="btn primary" onclick="saveRow()">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="overlay" id="setOverlay" onclick="if(event.target===this)closeSettings()">
+  <div class="modal">
+    <h2>☁️ Sinkron Cloud (Supabase)</h2>
+    <p class="note" style="margin-bottom:14px">Isi 3 kolom ini untuk menyimpan data di cloud & sinkron di semua perangkat. Cara mendapatkannya ada di file <code>PANDUAN.md</code>. Kalau dikosongkan, app tetap jalan dengan data lokal saja.</p>
+    <div class="field"><label>Project URL</label><input id="s_url" placeholder="https://xxxx.supabase.co"></div>
+    <div class="field"><label>Anon / Public Key</label><input id="s_key" placeholder="eyJhbGci..."></div>
+    <div class="field"><label>Workspace (kata sandi rahasia kamu)</label><input id="s_ws" placeholder="mis. janice-2026-rahasia"></div>
+    <p class="note" style="margin-bottom:14px">⚠️ <b>Catatan keamanan:</b> siapa pun yang punya URL + key + workspace ini bisa membaca/menulis datamu. Jangan bagikan. Untuk pemakaian pribadi ini cukup aman selama tidak disebar.</p>
+    <div class="modalfoot">
+      <button class="btn" style="background:var(--red-soft);color:var(--red)" onclick="disconnectCloud()">Putuskan</button>
+      <div class="right">
+        <button class="btn ghost" onclick="closeSettings()">Tutup</button>
+        <button class="btn primary" onclick="connectCloud()">Simpan &amp; Connect</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+'use strict';
+/* ================= constants ================= */
+const STATUSES = ['Inquiry','Brief Received','Cooking','Editing','Draft Sent','Revision','Approved','Scheduled','Posted','Paid','Completed'];
+const STATUS_COLOR = {
+  'Inquiry':['var(--gray-soft)','var(--gray)'],'Brief Received':['var(--purple-soft)','var(--purple)'],
+  'Cooking':['var(--orange-soft)','var(--orange)'],'Editing':['var(--orange-soft)','var(--orange)'],
+  'Draft Sent':['var(--blue-soft)','var(--blue)'],'Revision':['var(--red-soft)','var(--red)'],
+  'Approved':['var(--blue-soft)','var(--blue)'],'Scheduled':['var(--purple-soft)','var(--purple)'],
+  'Posted':['var(--green-soft)','var(--green)'],'Paid':['var(--green-soft)','var(--green)'],'Completed':['var(--green-soft)','var(--green)']
+};
+const PAYMENTS = ['Belum Invoice','Invoice Terkirim','DP','Lunas','Barter (non-fee)'];
+const PAY_COLOR = {
+  'Belum Invoice':['var(--red-soft)','var(--red)'],'Invoice Terkirim':['var(--orange-soft)','var(--orange)'],
+  'DP':['var(--blue-soft)','var(--blue)'],'Lunas':['var(--green-soft)','var(--green)'],'Barter (non-fee)':['var(--gray-soft)','var(--gray)']
+};
+const DELIVERABLES = ['Reels','TikTok','Feed','Story','YouTube Shorts','Foto'];
+const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+const DOW_ID = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
+const KEY = 'janice_scheduler_v2';
+const CFG = 'janice_cloud_cfg';
+
+/* local-timezone-safe ISO date */
+function toISO(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+const $ = id => document.getElementById(id);
+const todayISO = () => toISO(new Date());
+const nowStamp = () => new Date().toISOString();
+function uid(){ return 'c'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function cleanUrl(u){ return String(u||'').trim().replace(/\/+$/,'').replace(/\/rest\/v1$/i,'').replace(/\/+$/,''); }
+
+/* ================= storage ================= */
+function loadRows(){ try{ const r=localStorage.getItem(KEY); if(r) return JSON.parse(r); }catch(e){} return null; }
+function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(rows)); }catch(e){} }
+function loadCfg(){ try{ return JSON.parse(localStorage.getItem(CFG)||'null'); }catch(e){ return null; } }
+function saveCfg(c){ try{ localStorage.setItem(CFG, JSON.stringify(c)); }catch(e){} }
+
+/* ================= sample ================= */
+function sampleData(){
+  const iso=o=>{const d=new Date();d.setDate(d.getDate()+o);return toISO(d);};
+  const base=(o)=>({id:uid(),updated_at:nowStamp(),_deleted:false,_dirty:false});
+  return [
+    Object.assign(base(),{tanggal:iso(-5),brand:'Kecap Sedap',jenis:'Paid Promote',produk:'Kecap Manis Premium',ksp:'Lebih kental, gurih tanpa MSG',menu:'Ayam Kecap Pedas Manis',deliv:['Reels','TikTok'],masak:iso(1),draft:iso(3),approval:'',posting:iso(6),status:'Cooking',fee:2500000,bayar:'DP',lbrief:'',ldraft:'',lpost:'',catatan:'Sebut varian baru di 10 detik pertama'}),
+    Object.assign(base(),{tanggal:iso(-12),brand:'Teflon Maxim',jenis:'Barter Produk',produk:'Wajan Anti Lengket 24cm',ksp:'Masak tanpa minyak berlebih',menu:'Telur Dadar Padang',deliv:['Reels','Story'],masak:iso(-2),draft:iso(0),approval:'',posting:iso(4),status:'Editing',fee:0,bayar:'Barter (non-fee)',lbrief:'',ldraft:'',lpost:'',catatan:''}),
+    Object.assign(base(),{tanggal:iso(-20),brand:'Santan Kara',jenis:'Endorsement',produk:'Santan Cair 200ml',ksp:'Praktis, rasa santan asli',menu:'Opor Ayam Kuning',deliv:['Reels','Feed','Story'],masak:iso(-10),draft:iso(-7),approval:iso(-5),posting:iso(-3),status:'Posted',fee:3000000,bayar:'Invoice Terkirim',lbrief:'',ldraft:'',lpost:'',catatan:'Tunggu pembayaran 14 hari kerja'})
+  ];
+}
+
+let rows = loadRows() || sampleData();
+persist();
+
+/* ================= helpers ================= */
+function fmtDate(s){ if(!s) return '—'; const d=new Date(s+'T00:00:00'); return d.getDate()+' '+MONTHS_ID[d.getMonth()].slice(0,3)+' '+d.getFullYear(); }
+function fmtRp(n){ if(!n) return '—'; return 'Rp'+Number(n).toLocaleString('id-ID'); }
+function daysUntil(s){ if(!s) return null; const a=new Date(s+'T00:00:00'),b=new Date(todayISO()+'T00:00:00'); return Math.round((a-b)/86400000); }
+function esc(s){ return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function statusIdx(s){ return STATUSES.indexOf(s); }
+function activeRows(){ return rows.filter(r=>!r._deleted); }
+function flags(r){
+  const f={draft:null,posting:null}, si=statusIdx(r.status);
+  if(r.draft && si<statusIdx('Draft Sent')){ const d=daysUntil(r.draft); if(d<0)f.draft='late'; else if(d<=3)f.draft='soon'; }
+  if(r.posting && si<statusIdx('Posted')){ const d=daysUntil(r.posting); if(d<0)f.posting='late'; else if(d<=1)f.posting='soon'; }
+  return f;
+}
+
+/* ================= dashboard ================= */
+function renderDash(){
+  const now=new Date(), ym=toISO(now).slice(0,7), A=activeRows();
+  const thisMonth=A.filter(r=>(r.posting||r.tanggal||'').slice(0,7)===ym);
+  const draftPending=A.filter(r=>statusIdx(r.status)>=0 && statusIdx(r.status)<statusIdx('Draft Sent')).length;
+  const notPosted=A.filter(r=>statusIdx(r.status)<statusIdx('Posted')).length;
+  const unpaid=A.filter(r=>r.fee>0 && r.bayar!=='Lunas').length;
+  const income=thisMonth.reduce((s,r)=>s+(Number(r.fee)||0),0);
+  const late=A.filter(r=>{const f=flags(r);return f.draft==='late'||f.posting==='late';}).length;
+  $('dash').innerHTML=`
+    <div class="stat"><div class="label">Collab bulan ini (${MONTHS_ID[now.getMonth()]})</div><div class="value">${thisMonth.length}</div></div>
+    <div class="stat"><div class="label">Draft belum dikirim</div><div class="value ${draftPending?'warn':''}">${draftPending}</div></div>
+    <div class="stat"><div class="label">Belum posting</div><div class="value">${notPosted}</div></div>
+    <div class="stat"><div class="label">Deadline terlewat ⚠️</div><div class="value ${late?'warn':''}">${late}</div></div>
+    <div class="stat"><div class="label">Invoice belum lunas</div><div class="value ${unpaid?'warn':''}">${unpaid}</div></div>
+    <div class="stat"><div class="label">Potensi pendapatan bln ini</div><div class="value money">${fmtRp(income)}</div></div>`;
+}
+
+/* ================= filters ================= */
+function renderFilters(){
+  const A=activeRows();
+  const brands=[...new Set(A.map(r=>r.brand).filter(Boolean))].sort();
+  const keep=(sel,cur)=>{ if([...sel.options].some(o=>o.value===cur)) sel.value=cur; };
+  let cur=$('fBrand').value;
+  $('fBrand').innerHTML='<option value="">Semua Brand</option>'+brands.map(b=>`<option>${esc(b)}</option>`).join(''); keep($('fBrand'),cur);
+  cur=$('fStatus').value;
+  $('fStatus').innerHTML='<option value="">Semua Status</option>'+STATUSES.map(s=>`<option>${s}</option>`).join(''); keep($('fStatus'),cur);
+  const months=[...new Set(A.flatMap(r=>[r.tanggal,r.posting]).filter(Boolean).map(d=>d.slice(0,7)))].sort().reverse();
+  cur=$('fMonth').value;
+  $('fMonth').innerHTML='<option value="">Semua Bulan</option>'+months.map(m=>{const[y,mo]=m.split('-');return `<option value="${m}">${MONTHS_ID[+mo-1]} ${y}</option>`;}).join(''); keep($('fMonth'),cur);
+  $('brandList').innerHTML=brands.map(b=>`<option>${esc(b)}</option>`).join('');
+}
+function filteredRows(){
+  const q=$('fSearch').value.toLowerCase().trim(), fb=$('fBrand').value, fs=$('fStatus').value, fm=$('fMonth').value;
+  return activeRows().filter(r=>{
+    if(fb&&r.brand!==fb) return false;
+    if(fs&&r.status!==fs) return false;
+    if(fm&&!((r.tanggal||'').startsWith(fm)||(r.posting||'').startsWith(fm))) return false;
+    if(q&&!((r.brand||'')+' '+(r.menu||'')+' '+(r.produk||'')+' '+(r.ksp||'')).toLowerCase().includes(q)) return false;
+    return true;
+  }).sort((a,b)=>(a.posting||a.tanggal||'9999')<(b.posting||b.tanggal||'9999')?-1:1);
+}
+
+/* ================= render ================= */
+function badge(t,c){ return `<span class="badge" style="background:${c[0]};color:${c[1]}">${esc(t)}</span>`; }
+function dateCell(dateStr,flag,label){
+  let h=`<div class="datecell"><span>${fmtDate(dateStr)}</span>`;
+  if(flag==='late') h+=`<span class="flag late">⚠ Lewat!</span>`;
+  else if(flag==='soon') h+=`<span class="flag soon">⏰ ${label}</span>`;
+  return h+'</div>';
+}
+function render(){
+  renderDash(); renderFilters();
+  const data=filteredRows();
+  $('emptyMsg').style.display=data.length?'none':'block';
+  // table
+  $('tbody').innerHTML=data.map(r=>{
+    const f=flags(r), dD=daysUntil(r.draft), dP=daysUntil(r.posting);
+    return `<tr onclick="openModal('${r.id}')">
+      <td>${fmtDate(r.tanggal)}</td><td><b>${esc(r.brand)}</b></td><td>${esc(r.jenis||'—')}</td>
+      <td class="wrap"><b>${esc(r.produk||'')}</b>${r.ksp?`<br><span style="color:var(--muted);font-size:12px">${esc(r.ksp)}</span>`:''}</td>
+      <td class="wrap">${esc(r.menu||'—')}</td>
+      <td class="wrap">${(r.deliv||[]).map(d=>`<span class="chip">${esc(d)}</span>`).join('')||'—'}</td>
+      <td>${fmtDate(r.masak)}</td>
+      <td>${dateCell(r.draft,f.draft,dD===0?'Hari ini':'H-'+dD)}</td>
+      <td>${fmtDate(r.approval)}</td>
+      <td>${dateCell(r.posting,f.posting,dP===0?'Hari ini':'H-'+dP)}</td>
+      <td>${badge(r.status,STATUS_COLOR[r.status]||['#eee','#555'])}</td>
+      <td class="fee">${fmtRp(r.fee)}</td>
+      <td>${r.bayar?badge(r.bayar,PAY_COLOR[r.bayar]||['#eee','#555']):'—'}</td>
+      <td class="links" onclick="event.stopPropagation()">
+        ${r.lbrief?`<a href="${esc(r.lbrief)}" target="_blank" rel="noopener">Brief</a>`:''}
+        ${r.ldraft?`<a href="${esc(r.ldraft)}" target="_blank" rel="noopener">Draft</a>`:''}
+        ${r.lpost?`<a href="${esc(r.lpost)}" target="_blank" rel="noopener">Post</a>`:''}
+      </td></tr>`;
+  }).join('');
+  // cards (mobile)
+  $('cardsView').innerHTML=data.map(r=>{
+    const f=flags(r), dD=daysUntil(r.draft), dP=daysUntil(r.posting);
+    const dflag=f.draft==='late'?'<span class="flag late">⚠ draft lewat</span>':f.draft==='soon'?`<span class="flag soon">⏰ draft ${dD===0?'hari ini':'H-'+dD}</span>`:'';
+    const pflag=f.posting==='late'?'<span class="flag late">⚠ posting lewat</span>':f.posting==='soon'?`<span class="flag soon">⏰ posting ${dP===0?'hari ini':'H-'+dP}</span>`:'';
+    return `<div class="ccard" onclick="openModal('${r.id}')">
+      <div class="top"><div><div class="brand">${esc(r.brand)}</div><div class="meta">${esc(r.jenis||'')}${r.menu?' · '+esc(r.menu):''}</div></div>${badge(r.status,STATUS_COLOR[r.status]||['#eee','#555'])}</div>
+      ${(r.deliv||[]).map(d=>`<span class="chip">${esc(d)}</span>`).join('')}
+      <div class="dts" style="margin-top:8px">
+        <div><b>🍳 Masak</b><br>${fmtDate(r.masak)}</div>
+        <div><b>📤 Draft</b><br>${fmtDate(r.draft)} ${dflag}</div>
+        <div><b>✅ Approval</b><br>${fmtDate(r.approval)}</div>
+        <div><b>📱 Posting</b><br>${fmtDate(r.posting)} ${pflag}</div>
+      </div>
+      <div class="foot"><span class="fee">${fmtRp(r.fee)}</span>${r.bayar?badge(r.bayar,PAY_COLOR[r.bayar]||['#eee','#555']):''}</div>
+    </div>`;
+  }).join('');
+  if(view==='cal') renderCal();
+}
+
+/* ================= calendar ================= */
+let view='table', calDate=new Date();
+function setView(v){
+  view=v;
+  const mobile=window.matchMedia('(max-width:760px)').matches;
+  $('tableView').style.display=(v==='table'&&!mobile)?'block':'none';
+  $('cardsView').style.display=(v==='table'&&mobile)?'flex':'none';
+  $('calView').style.display=v==='cal'?'block':'none';
+  $('btnTable').classList.toggle('active',v==='table');
+  $('btnCal').classList.toggle('active',v==='cal');
+  if(v==='cal') renderCal();
+}
+function calShift(n){ calDate.setMonth(calDate.getMonth()+n); renderCal(); }
+function calToday(){ calDate=new Date(); renderCal(); }
+function renderCal(){
+  const y=calDate.getFullYear(), m=calDate.getMonth();
+  $('calTitle').textContent=MONTHS_ID[m]+' '+y;
+  const startDow=new Date(y,m,1).getDay(), dim=new Date(y,m+1,0).getDate();
+  const data=filteredRows(), ev={};
+  data.forEach(r=>{
+    if(r.masak)(ev[r.masak]=ev[r.masak]||[]).push({t:'masak',l:'🍳 '+r.brand,id:r.id});
+    if(r.draft)(ev[r.draft]=ev[r.draft]||[]).push({t:'draft',l:'📤 '+r.brand,id:r.id});
+    if(r.posting)(ev[r.posting]=ev[r.posting]||[]).push({t:'posting',l:'📱 '+r.brand,id:r.id});
+  });
+  let h=DOW_ID.map(d=>`<div class="caldow">${d}</div>`).join('');
+  for(let i=0;i<startDow;i++){ const d=new Date(y,m,i-startDow+1); h+=`<div class="calcell other"><div class="d">${d.getDate()}</div></div>`; }
+  const tISO=todayISO();
+  for(let d=1;d<=dim;d++){
+    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const evs=(ev[iso]||[]).map(e=>`<div class="evt ${e.t}" onclick="event.stopPropagation();openModal('${e.id}')" title="${esc(e.l)}">${esc(e.l)}</div>`).join('');
+    h+=`<div class="calcell ${iso===tISO?'today':''}"><div class="d">${d}</div>${evs}</div>`;
+  }
+  $('calGrid').innerHTML=h;
+}
+
+/* ================= modal ================= */
+function buildStatic(){
+  $('m_status').innerHTML=STATUSES.map(s=>`<option>${s}</option>`).join('');
+  $('m_bayar').innerHTML=PAYMENTS.map(s=>`<option>${s}</option>`).join('');
+  $('m_deliv').innerHTML=DELIVERABLES.map(d=>`<label><input type="checkbox" value="${d}"><span>${d}</span></label>`).join('');
+}
+function openModal(id,prefill){
+  const r=id?rows.find(x=>x.id===id):null;
+  $('modalTitle').textContent=r?'Edit — '+(r.brand||''):'Tambah Collab';
+  $('btnDelete').style.display=r?'inline-block':'none';
+  const v=r||prefill||{};
+  $('m_id').value=r?r.id:'';
+  $('m_tanggal').value=v.tanggal||todayISO();
+  $('m_brand').value=v.brand||''; $('m_jenis').value=v.jenis||'';
+  $('m_produk').value=v.produk||''; $('m_ksp').value=v.ksp||'';
+  $('m_menu').value=v.menu||''; $('m_status').value=v.status||'Inquiry';
+  $('m_masak').value=v.masak||''; $('m_draft').value=v.draft||'';
+  $('m_approval').value=v.approval||''; $('m_posting').value=v.posting||'';
+  $('m_fee').value=v.fee||''; $('m_bayar').value=v.bayar||'Belum Invoice';
+  $('m_lbrief').value=v.lbrief||''; $('m_ldraft').value=v.ldraft||''; $('m_lpost').value=v.lpost||'';
+  $('m_catatan').value=v.catatan||'';
+  document.querySelectorAll('#m_deliv input').forEach(cb=>cb.checked=(v.deliv||[]).includes(cb.value));
+  $('overlay').classList.add('open');
+}
+function closeModal(){ $('overlay').classList.remove('open'); }
+function saveRow(){
+  const brand=$('m_brand').value.trim();
+  if(!brand){ alert('Nama brand wajib diisi.'); return; }
+  const data={
+    tanggal:$('m_tanggal').value, brand, jenis:$('m_jenis').value.trim(),
+    produk:$('m_produk').value.trim(), ksp:$('m_ksp').value.trim(), menu:$('m_menu').value.trim(),
+    deliv:[...document.querySelectorAll('#m_deliv input:checked')].map(c=>c.value),
+    masak:$('m_masak').value, draft:$('m_draft').value, approval:$('m_approval').value, posting:$('m_posting').value,
+    status:$('m_status').value, fee:Number($('m_fee').value)||0, bayar:$('m_bayar').value,
+    lbrief:$('m_lbrief').value.trim(), ldraft:$('m_ldraft').value.trim(), lpost:$('m_lpost').value.trim(),
+    catatan:$('m_catatan').value.trim()
+  };
+  const id=$('m_id').value;
+  if(id){ const i=rows.findIndex(r=>r.id===id); rows[i]=Object.assign({},rows[i],data,{updated_at:nowStamp(),_dirty:true,_deleted:false}); }
+  else { rows.push(Object.assign({id:uid(),updated_at:nowStamp(),_dirty:true,_deleted:false},data)); }
+  persist(); closeModal(); render(); pushDirty();
+}
+function deleteRow(){
+  const id=$('m_id').value;
+  if(!confirm('Hapus collab ini?')) return;
+  const i=rows.findIndex(r=>r.id===id);
+  if(i>=0){ rows[i]._deleted=true; rows[i].updated_at=nowStamp(); rows[i]._dirty=true; }
+  persist(); closeModal(); render(); pushDirty();
+}
+
+/* ================= quick add ================= */
+function resolveDay(day){ const t=new Date(); let d=new Date(t.getFullYear(),t.getMonth(),day); if(d<new Date(t.getFullYear(),t.getMonth(),t.getDate())) d=new Date(t.getFullYear(),t.getMonth()+1,day); return toISO(d); }
+function quickAdd(){
+  const text=$('qa').value.trim(); if(!text) return;
+  const p={}, lower=text.toLowerCase();
+  let m=text.match(/collab\s+(?:dengan\s+|sama\s+|bareng\s+)?([^,.]+)/i);
+  if(m) p.brand=m[1].replace(/\b(masak|draft|posting|fee)\b.*/i,'').trim();
+  m=text.match(/masak(?:\s+menu)?\s+([^,.]+)/i);
+  if(m) p.menu=m[1].replace(/\b(tanggal|tgl)\b.*/i,'').trim();
+  const dateFor=kw=>{ const re=new RegExp(kw+'\\s+(?:tanggal\\s+|tgl\\.?\\s+)?(\\d{1,2})(?:\\s*[\\/\\-]\\s*(\\d{1,2}))?','i'); const mm=text.match(re); if(!mm) return ''; const day=+mm[1];
+    if(mm[2]){ const t=new Date(); let y=t.getFullYear(); const mo=+mm[2]; if(mo<t.getMonth()+1||(mo===t.getMonth()+1&&day<t.getDate())) y++; return `${y}-${String(mo).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }
+    return resolveDay(day); };
+  p.draft=dateFor('(?:kirim\\s+)?draft'); p.posting=dateFor('posting');
+  const mm=text.match(/masak\s+(?:tanggal|tgl\.?)\s+(\d{1,2})/i); if(mm) p.masak=resolveDay(+mm[1]);
+  const t=new Date();
+  if(/\bbesok\b/i.test(lower)){ t.setDate(t.getDate()+1); p.tanggal=toISO(t); }
+  else if(/\blusa\b/i.test(lower)){ t.setDate(t.getDate()+2); p.tanggal=toISO(t); }
+  else p.tanggal=todayISO();
+  m=lower.match(/fee\s*(?:rp\.?\s*)?([\d.,]+)\s*(jt|juta|rb|ribu|k)?/i);
+  if(m){ let n; const unit=m[2]||'';
+    if(/jt|juta/.test(unit)) n=parseFloat(m[1].replace(',','.'))*1e6;
+    else if(/rb|ribu|k/.test(unit)) n=parseFloat(m[1].replace(',','.'))*1e3;
+    else n=parseFloat(m[1].replace(/\./g,'').replace(',','.'));
+    p.fee=Math.round(n); }
+  p.status='Brief Received';
+  openModal(null,p); $('qa').value='';
+}
+
+/* ================= export/import ================= */
+function download(name,content,type){ const b=new Blob([content],{type}), a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); URL.revokeObjectURL(a.href); }
+function exportCSV(){
+  const head=['Tanggal','Brand','Jenis Collab','Produk','KSP','Menu','Deliverables','Tgl Masak','Tgl Kirim Draft','Tgl Approval','Tgl Posting','Status','Fee','Status Pembayaran','Link Brief','Link Draft','Link Posting','Catatan'];
+  const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
+  const lines=[head.map(q).join(',')].concat(activeRows().map(r=>[r.tanggal,r.brand,r.jenis,r.produk,r.ksp,r.menu,(r.deliv||[]).join('; '),r.masak,r.draft,r.approval,r.posting,r.status,r.fee,r.bayar,r.lbrief,r.ldraft,r.lpost,r.catatan].map(q).join(',')));
+  download('madeby-janice-collabs.csv','﻿'+lines.join('\n'),'text/csv;charset=utf-8');
+}
+function importJSON(ev){ const f=ev.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=e=>{ try{ const d=JSON.parse(e.target.result); if(!Array.isArray(d)) throw 0; rows=d; persist(); render(); alert('Restore berhasil ('+d.length+' baris).'); }catch(x){ alert('File tidak valid.'); } }; rd.readAsText(f); ev.target.value=''; }
+
+/* ================= CLOUD SYNC (Supabase) ================= */
+let sb=null, cfg=loadCfg();
+function setSync(state,text){ const dot=$('syncDot'); dot.className='dot '+(state||''); $('syncText').textContent=text; }
+function initCloud(){
+  if(cfg && cfg.url && cfg.key && window.supabase){
+    try{ sb=window.supabase.createClient(cleanUrl(cfg.url),cfg.key); cfg.url=cleanUrl(cfg.url); saveCfg(cfg); $('syncBtn').style.display='inline-block'; setSync('sync','Menyambungkan ke cloud…'); syncNow(); }
+    catch(e){ setSync('off','Config cloud error: '+e.message); }
+  } else {
+    setSync('', 'Cloud belum diatur — data tersimpan lokal di perangkat ini. Tap ☁️ Cloud untuk sinkron.');
+  }
+}
+function openSettings(){ $('s_url').value=cfg?.url||''; $('s_key').value=cfg?.key||''; $('s_ws').value=cfg?.ws||''; $('setOverlay').classList.add('open'); }
+function closeSettings(){ $('setOverlay').classList.remove('open'); }
+function connectCloud(){
+  const url=cleanUrl($('s_url').value), key=$('s_key').value.trim(), ws=$('s_ws').value.trim();
+  if(!url||!key||!ws){ alert('URL, Key, dan Workspace wajib diisi.'); return; }
+  cfg={url,key,ws}; saveCfg(cfg); closeSettings(); initCloud();
+}
+function disconnectCloud(){ if(!confirm('Putuskan cloud? Data lokal tetap ada.')) return; cfg=null; localStorage.removeItem(CFG); sb=null; $('syncBtn').style.display='none'; setSync('','Cloud diputus. Data lokal saja.'); }
+
+async function pushDirty(){
+  if(!sb) return;
+  const dirty=rows.filter(r=>r._dirty);
+  if(!dirty.length) return;
+  try{
+    const payload=dirty.map(r=>({ id:r.id, workspace:cfg.ws, data:stripMeta(r), updated_at:r.updated_at, deleted:!!r._deleted }));
+    const {error}=await sb.from('collabs').upsert(payload,{onConflict:'id'});
+    if(error) throw error;
+    dirty.forEach(r=>r._dirty=false); persist();
+    setSync('on','Tersinkron ✓ '+new Date().toLocaleTimeString('id-ID'));
+  }catch(e){ setSync('off','Gagal push (akan dicoba lagi): '+(e.message||e)); }
+}
+function stripMeta(r){ const o=Object.assign({},r); delete o._dirty; delete o._deleted; delete o.updated_at; delete o.id; return o; }
+
+async function syncNow(){
+  if(!sb){ openSettings(); return; }
+  setSync('sync','Sinkronisasi…');
+  try{
+    await pushDirty();
+    const {data,error}=await sb.from('collabs').select('*').eq('workspace',cfg.ws);
+    if(error) throw error;
+    const localById={}; rows.forEach(r=>localById[r.id]=r);
+    (data||[]).forEach(rem=>{
+      const loc=localById[rem.id];
+      if(!loc || new Date(rem.updated_at)>new Date(loc.updated_at)){
+        const merged=Object.assign({}, rem.data||{}, {id:rem.id, updated_at:rem.updated_at, _deleted:!!rem.deleted, _dirty:false});
+        if(loc){ Object.assign(loc,merged); } else { rows.push(merged); localById[rem.id]=merged; }
+      }
+    });
+    persist(); render();
+    setSync('on','Tersinkron ✓ '+new Date().toLocaleTimeString('id-ID'));
+  }catch(e){ setSync('off','Gagal sync: '+(e.message||e)+' — cek config/SQL.'); }
+}
+
+window.addEventListener('online',()=>{ if(sb){ setSync('sync','Online — sinkron…'); syncNow(); } });
+window.addEventListener('offline',()=>{ if(sb) setSync('off','Offline — perubahan disimpan lokal, sync saat online.'); });
+
+/* ================= PWA ================= */
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
+
+/* ================= init ================= */
+buildStatic();
+setView('table');
+render();
+initCloud();
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeSettings(); } });
+window.matchMedia('(max-width:760px)').addEventListener('change',()=>setView(view));
+</script>
+</body>
+</html>
