@@ -548,7 +548,7 @@ function exportCSV(){
 function importJSON(ev){ const f=ev.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=e=>{ try{ const d=JSON.parse(e.target.result); if(!Array.isArray(d)) throw 0; rows=d; persist(); render(); alert('Restore berhasil ('+d.length+' baris).'); }catch(x){ alert('File tidak valid.'); } }; rd.readAsText(f); ev.target.value=''; }
 
 /* ================= CLOUD SYNC (Supabase) ================= */
-let sb=null, cfg=loadCfg();
+let sb=null, cfg=loadCfg(), syncing=false, lastSync=0;
 function setSync(state,text){ const dot=$('syncDot'); dot.className='dot '+(state||''); $('syncText').textContent=text; }
 function initCloud(){
   if(cfg && cfg.url && cfg.key && window.supabase){
@@ -581,9 +581,11 @@ async function pushDirty(){
 }
 function stripMeta(r){ const o=Object.assign({},r); delete o._dirty; delete o._deleted; delete o.updated_at; delete o.id; return o; }
 
-async function syncNow(){
-  if(!sb){ openSettings(); return; }
-  setSync('sync','Sinkronisasi…');
+async function syncNow(silent){
+  if(!sb){ if(!silent) openSettings(); return; }
+  if(syncing) return;
+  syncing=true;
+  if(!silent) setSync('sync','Sinkronisasi…');
   try{
     await pushDirty();
     const {data,error}=await sb.from('collabs').select('*').eq('workspace',cfg.ws);
@@ -597,12 +599,17 @@ async function syncNow(){
       }
     });
     persist(); render();
+    lastSync=Date.now();
     setSync('on','Tersinkron ✓ '+new Date().toLocaleTimeString('id-ID'));
   }catch(e){ setSync('off','Gagal sync: '+(e.message||e)+' — cek config/SQL.'); }
+  finally{ syncing=false; }
 }
 
 window.addEventListener('online',()=>{ if(sb){ setSync('sync','Online — sinkron…'); syncNow(); } });
 window.addEventListener('offline',()=>{ if(sb) setSync('off','Offline — perubahan disimpan lokal, sync saat online.'); });
+// Auto-sync: saat app dibuka/kembali fokus, dan berkala tiap 45 detik (senyap).
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && sb && navigator.onLine) syncNow(true); });
+setInterval(()=>{ if(sb && navigator.onLine && document.visibilityState==='visible' && Date.now()-lastSync>40000) syncNow(true); }, 45000);
 
 /* ================= PWA ================= */
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
