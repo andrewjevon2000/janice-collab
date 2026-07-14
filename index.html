@@ -86,22 +86,26 @@
   .ccard .dts{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;margin-bottom:8px}
   .ccard .dts b{color:var(--muted);font-weight:600}
   .ccard .foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
-  /* calendar */
-  .calwrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;display:none}
-  .calhead{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
-  .calhead h2{font-size:15px;min-width:150px;text-align:center}
-  .calgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-  .caldow{text-align:center;font-size:10.5px;color:var(--muted);font-weight:700;padding:4px 0;text-transform:uppercase}
-  .calcell{min-height:74px;border:1px solid var(--line);border-radius:8px;padding:4px;font-size:10.5px;background:#fffdf9}
-  .calcell.other{opacity:.35}
-  .calcell.today{border-color:var(--accent);border-width:2px}
-  .calcell .d{font-weight:700;margin-bottom:2px}
-  .evt{border-radius:5px;padding:2px 4px;margin-bottom:2px;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
-  .evt.masak{background:var(--orange-soft);color:var(--orange)}
-  .evt.draft{background:var(--blue-soft);color:var(--blue)}
-  .evt.posting{background:var(--green-soft);color:var(--green)}
-  .legend{display:flex;gap:12px;justify-content:center;margin-top:12px;font-size:12px;color:var(--muted);flex-wrap:wrap}
-  .legend .evt{display:inline-block;margin:0 4px 0 0}
+  /* calendar (agenda / schedule view) */
+  .calwrap{background:transparent;border:none;padding:0;display:none}
+  .agenda{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
+  .agwk{font-size:11.5px;font-weight:700;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin:18px 0 8px;padding-left:56px}
+  .agwk:first-child{margin-top:0}
+  .agrow{display:flex;gap:10px;margin-bottom:8px}
+  .agdate{width:46px;flex:none;text-align:center;padding-top:6px}
+  .agdate .dow{display:block;font-size:10.5px;color:var(--muted);text-transform:uppercase;font-weight:600}
+  .agdate .num{display:inline-flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;min-width:34px;height:34px;border-radius:50%;color:var(--ink)}
+  .agdate .num.today{background:var(--accent);color:#fff}
+  .agcard{flex:1;min-width:0;border:1.5px solid var(--line);border-left-width:4px;border-radius:10px;padding:10px 12px;cursor:pointer;background:var(--card);transition:.12s}
+  .agcard:active{transform:scale(.995)}
+  .agcard.masak{border-color:var(--orange)}
+  .agcard.draft{border-color:var(--blue)}
+  .agcard.posting{border-color:var(--green)}
+  .agtitle{font-weight:700;font-size:14.5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .agcard.masak .agtitle{color:var(--orange)}
+  .agcard.draft .agtitle{color:var(--blue)}
+  .agcard.posting .agtitle{color:var(--green)}
+  .agsub{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   /* modal */
   .overlay{position:fixed;inset:0;background:rgba(45,42,38,.45);display:none;align-items:flex-start;justify-content:center;padding:20px 12px;overflow:auto;z-index:50}
   .overlay.open{display:flex}
@@ -121,11 +125,30 @@
   .modalfoot .right{display:flex;gap:8px}
   .note{font-size:12px;color:var(--muted);line-height:1.5}
   .note code{background:var(--gray-soft);padding:1px 5px;border-radius:4px;font-size:11.5px}
+  /* bottom tab nav (mobile only) */
+  .bottomnav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--card);border-top:1px solid var(--line);
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -2px 12px rgba(45,42,38,.06)}
+  .bottomnav button{flex:1;min-height:48px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    font-size:20px;color:var(--muted);border-radius:10px}
+  .bottomnav button span{font-size:10.5px;font-weight:700;letter-spacing:.02em}
+  .bottomnav button.active{color:var(--accent)}
+  .bottomnav .navfab{flex:0 0 62px;margin-top:-22px}
+  .bottomnav .navfab i{display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;
+    font-size:28px;font-style:normal;font-weight:700;box-shadow:0 4px 12px rgba(194,96,62,.4)}
+  /* Lainnya tab */
+  #secMore{display:none}
+  .morelist{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .morelist button{display:flex;align-items:center;gap:12px;width:100%;border:none;background:none;padding:15px 16px;font-size:14.5px;font-weight:600;color:var(--ink);cursor:pointer;border-top:1px solid var(--line);text-align:left}
+  .morelist button:first-child{border-top:none}
+  .morelist button:active{background:var(--accent-soft)}
+  .morelist .sub{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
   @media(max-width:760px){
     .grid2,.grid4{grid-template-columns:1fr}
     .tablewrap{display:none}
-    .cards{display:flex}
     header h1{font-size:18px}
+    .hbtns,.viewtoggle{display:none}
+    .bottomnav{display:flex}
+    body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
   }
 </style>
 </head>
@@ -149,6 +172,7 @@
   <button class="btn small" id="syncBtn" onclick="syncNow()" style="display:none">🔄 Sync</button>
 </div>
 
+<section id="secHome">
 <div class="dash" id="dash"></div>
 
 <div class="quickadd">
@@ -156,7 +180,9 @@
   <input id="qa" placeholder='Contoh: "Besok collab Kecap ABC, masak Chicken Katsu, draft tanggal 20, posting 23, fee 2jt"' onkeydown="if(event.key==='Enter')quickAdd()">
   <button class="btn primary small" onclick="quickAdd()">Isi</button>
 </div>
+</section>
 
+<section id="secCollabs">
 <div class="toolbar">
   <input type="search" id="fSearch" placeholder="🔍 Cari brand / menu…" oninput="render()">
   <select id="fBrand" onchange="render()"><option value="">Semua Brand</option></select>
@@ -181,21 +207,31 @@
 </div>
 <div class="cards" id="cardsView"></div>
 <div class="empty" id="emptyMsg" style="display:none">Belum ada collab. Tap <b>＋ Collab</b> atau pakai Quick Add.</div>
+</section>
 
+<section id="secJadwal">
 <div class="calwrap" id="calView">
-  <div class="calhead">
-    <button class="btn small" onclick="calShift(-1)">‹</button>
-    <h2 id="calTitle"></h2>
-    <button class="btn small" onclick="calShift(1)">›</button>
-    <button class="btn small ghost" onclick="calToday()">Hari ini</button>
-  </div>
-  <div class="calgrid" id="calGrid"></div>
-  <div class="legend">
-    <span><span class="evt masak">🍳</span>Masak</span>
-    <span><span class="evt draft">📤</span>Draft</span>
-    <span><span class="evt posting">📱</span>Posting</span>
-  </div>
+  <div class="agenda" id="agenda"></div>
 </div>
+</section>
+
+<section id="secMore">
+  <div class="morelist">
+    <button onclick="openSettings()">☁️ <span>Sinkron Cloud<span class="sub">Atur koneksi Supabase &amp; workspace</span></span></button>
+    <button onclick="syncNow()">🔄 <span>Sync Sekarang<span class="sub">Paksa tarik &amp; kirim data terbaru</span></span></button>
+    <button onclick="exportCSV()">⬇️ <span>Export CSV<span class="sub">Unduh semua collab untuk Excel/arsip</span></span></button>
+    <button onclick="exportJSON()">💾 <span>Backup Data<span class="sub">Simpan file cadangan JSON</span></span></button>
+    <button onclick="document.getElementById('importFile').click()">📂 <span>Restore Data<span class="sub">Pulihkan dari file backup</span></span></button>
+  </div>
+</section>
+
+<nav class="bottomnav" id="bottomnav">
+  <button id="nav-home" onclick="setTab('home')">🏠<span>Home</span></button>
+  <button id="nav-collabs" onclick="setTab('collabs')">📋<span>Collabs</span></button>
+  <button class="navfab" onclick="openModal()" aria-label="Tambah collab"><i>＋</i></button>
+  <button id="nav-jadwal" onclick="setTab('jadwal')">📅<span>Jadwal</span></button>
+  <button id="nav-more" onclick="setTab('more')">⚙️<span>Lainnya</span></button>
+</nav>
 
 <!-- Collab modal -->
 <div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
@@ -283,7 +319,7 @@ const PAY_COLOR = {
 const DELIVERABLES = ['Reels','TikTok','Feed','Story','YouTube Shorts','Foto'];
 const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const DOW_ID = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
-const KEY = 'janice_scheduler_v2';
+const KEY = 'janice_scheduler_v3';
 const CFG = 'janice_cloud_cfg';
 
 /* local-timezone-safe ISO date */
@@ -311,7 +347,7 @@ function sampleData(){
   ];
 }
 
-let rows = loadRows() || sampleData();
+let rows = loadRows() || [];
 persist();
 
 /* ================= helpers ================= */
@@ -421,42 +457,69 @@ function render(){
       <div class="foot"><span class="fee">${fmtRp(r.fee)}</span>${r.bayar?badge(r.bayar,PAY_COLOR[r.bayar]||['#eee','#555']):''}</div>
     </div>`;
   }).join('');
-  if(view==='cal') renderCal();
+  renderCal();
 }
 
 /* ================= calendar ================= */
-let view='table', calDate=new Date();
+let view='table', calDate=new Date(), mobTab='home';
+function isMobile(){ return window.matchMedia('(max-width:760px)').matches; }
+function applyVisibility(){
+  const S={home:$('secHome'),collabs:$('secCollabs'),jadwal:$('secJadwal'),more:$('secMore')};
+  if(isMobile()){
+    for(const k in S) S[k].style.display=(k===mobTab)?'block':'none';
+    $('tableView').style.display='none';
+    $('cardsView').style.display=(mobTab==='collabs')?'flex':'none';
+    $('calView').style.display=(mobTab==='jadwal')?'block':'none';
+  } else {
+    S.home.style.display='block'; S.collabs.style.display='block'; S.more.style.display='none';
+    S.jadwal.style.display='block';
+    $('tableView').style.display=(view==='table')?'block':'none';
+    $('cardsView').style.display='none';
+    $('calView').style.display=(view==='cal')?'block':'none';
+  }
+}
 function setView(v){
   view=v;
-  const mobile=window.matchMedia('(max-width:760px)').matches;
-  $('tableView').style.display=(v==='table'&&!mobile)?'block':'none';
-  $('cardsView').style.display=(v==='table'&&mobile)?'flex':'none';
-  $('calView').style.display=v==='cal'?'block':'none';
   $('btnTable').classList.toggle('active',v==='table');
   $('btnCal').classList.toggle('active',v==='cal');
+  applyVisibility();
   if(v==='cal') renderCal();
 }
-function calShift(n){ calDate.setMonth(calDate.getMonth()+n); renderCal(); }
-function calToday(){ calDate=new Date(); renderCal(); }
+function setTab(t){
+  mobTab=t;
+  ['home','collabs','jadwal','more'].forEach(k=>{ const b=$('nav-'+k); if(b) b.classList.toggle('active',k===t); });
+  applyVisibility();
+  if(t==='jadwal') renderCal();
+  window.scrollTo({top:0});
+}
+function weekStart(d){ const x=new Date(d); const off=(x.getDay()+6)%7; x.setDate(x.getDate()-off); x.setHours(0,0,0,0); return x; }
+function weekKey(d){ return toISO(weekStart(d)); }
+function weekLabel(d){
+  const s=weekStart(d), e=new Date(s); e.setDate(e.getDate()+6);
+  const mS=MONTHS_ID[s.getMonth()].toUpperCase(), mE=MONTHS_ID[e.getMonth()].toUpperCase();
+  return s.getMonth()===e.getMonth() ? `${mS} ${s.getDate()} – ${e.getDate()}` : `${mS} ${s.getDate()} – ${mE} ${e.getDate()}`;
+}
+const AG_LBL={masak:'🍳 Masak', draft:'📤 Kirim Draft', posting:'📱 Posting'};
 function renderCal(){
-  const y=calDate.getFullYear(), m=calDate.getMonth();
-  $('calTitle').textContent=MONTHS_ID[m]+' '+y;
-  const startDow=new Date(y,m,1).getDay(), dim=new Date(y,m+1,0).getDate();
-  const data=filteredRows(), ev={};
-  data.forEach(r=>{
-    if(r.masak)(ev[r.masak]=ev[r.masak]||[]).push({t:'masak',l:'🍳 '+r.brand,id:r.id});
-    if(r.draft)(ev[r.draft]=ev[r.draft]||[]).push({t:'draft',l:'📤 '+r.brand,id:r.id});
-    if(r.posting)(ev[r.posting]=ev[r.posting]||[]).push({t:'posting',l:'📱 '+r.brand,id:r.id});
-  });
-  let h=DOW_ID.map(d=>`<div class="caldow">${d}</div>`).join('');
-  for(let i=0;i<startDow;i++){ const d=new Date(y,m,i-startDow+1); h+=`<div class="calcell other"><div class="d">${d.getDate()}</div></div>`; }
+  const A=$('agenda'); if(!A) return;
+  const data=filteredRows(), events=[];
+  data.forEach(r=>{ ['masak','draft','posting'].forEach(k=>{ if(r[k]) events.push({date:r[k],type:k,brand:r.brand,menu:r.menu,status:r.status,id:r.id}); }); });
+  events.sort((a,b)=> a.date<b.date?-1 : a.date>b.date?1 : 0);
+  if(!events.length){ A.innerHTML='<div class="empty">Belum ada jadwal. Tambah collab dengan tanggal masak / kirim draft / posting.</div>'; return; }
   const tISO=todayISO();
-  for(let d=1;d<=dim;d++){
-    const iso=`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const evs=(ev[iso]||[]).map(e=>`<div class="evt ${e.t}" onclick="event.stopPropagation();openModal('${e.id}')" title="${esc(e.l)}">${esc(e.l)}</div>`).join('');
-    h+=`<div class="calcell ${iso===tISO?'today':''}"><div class="d">${d}</div>${evs}</div>`;
-  }
-  $('calGrid').innerHTML=h;
+  let html='', lastWeek='', lastDay='';
+  events.forEach(e=>{
+    const d=new Date(e.date+'T00:00:00'), wk=weekKey(d);
+    if(wk!==lastWeek){ html+=`<div class="agwk">${weekLabel(d)}</div>`; lastWeek=wk; lastDay=''; }
+    let col='<div class="agdate"></div>';
+    if(e.date!==lastDay){ col=`<div class="agdate"><span class="dow">${DOW_ID[d.getDay()]}</span><span class="num ${e.date===tISO?'today':''}">${d.getDate()}</span></div>`; lastDay=e.date; }
+    const sub=[e.menu,e.status].filter(Boolean).join(' · ');
+    html+=`<div class="agrow">${col}<div class="agcard ${e.type}" onclick="openModal('${e.id}')">
+      <div class="agtitle">${esc(AG_LBL[e.type])} — ${esc(e.brand)}</div>
+      <div class="agsub">${esc(sub||'—')}</div>
+    </div></div>`;
+  });
+  A.innerHTML=html;
 }
 
 /* ================= modal ================= */
@@ -545,6 +608,7 @@ function exportCSV(){
   const lines=[head.map(q).join(',')].concat(activeRows().map(r=>[r.tanggal,r.brand,r.jenis,r.produk,r.ksp,r.menu,(r.deliv||[]).join('; '),r.masak,r.draft,r.approval,r.posting,r.status,r.fee,r.bayar,r.lbrief,r.ldraft,r.lpost,r.catatan].map(q).join(',')));
   download('madeby-janice-collabs.csv','﻿'+lines.join('\n'),'text/csv;charset=utf-8');
 }
+function exportJSON(){ download('madeby-janice-backup.json', JSON.stringify(rows,null,2), 'application/json'); }
 function importJSON(ev){ const f=ev.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=e=>{ try{ const d=JSON.parse(e.target.result); if(!Array.isArray(d)) throw 0; rows=d; persist(); render(); alert('Restore berhasil ('+d.length+' baris).'); }catch(x){ alert('File tidak valid.'); } }; rd.readAsText(f); ev.target.value=''; }
 
 /* ================= CLOUD SYNC (Supabase) ================= */
@@ -587,9 +651,18 @@ async function syncNow(silent){
   syncing=true;
   if(!silent) setSync('sync','Sinkronisasi…');
   try{
-    await pushDirty();
     const {data,error}=await sb.from('collabs').select('*').eq('workspace',cfg.ws);
     if(error) throw error;
+    const remoteById={}; (data||[]).forEach(r=>remoteById[r.id]=r);
+    // PUSH: kirim semua baris lokal yang belum ada di cloud / lebih baru (self-healing)
+    const toPush=rows.filter(r=>{ const rem=remoteById[r.id]; return !rem || new Date(r.updated_at)>new Date(rem.updated_at); });
+    if(toPush.length){
+      const payload=toPush.map(r=>({ id:r.id, workspace:cfg.ws, data:stripMeta(r), updated_at:r.updated_at, deleted:!!r._deleted }));
+      const {error:perr}=await sb.from('collabs').upsert(payload,{onConflict:'id'});
+      if(perr) throw perr;
+      toPush.forEach(r=>r._dirty=false);
+    }
+    // PULL: ambil baris cloud yang lebih baru / belum ada lokal
     const localById={}; rows.forEach(r=>localById[r.id]=r);
     (data||[]).forEach(rem=>{
       const loc=localById[rem.id];
@@ -617,10 +690,11 @@ if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator
 /* ================= init ================= */
 buildStatic();
 setView('table');
+setTab('home');
 render();
 initCloud();
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeSettings(); } });
-window.matchMedia('(max-width:760px)').addEventListener('change',()=>setView(view));
+window.matchMedia('(max-width:760px)').addEventListener('change',()=>{ applyVisibility(); });
 </script>
 </body>
 </html>
