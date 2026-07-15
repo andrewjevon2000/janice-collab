@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#c2603e">
+<meta name="theme-color" content="#f4f3f1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Janice Collab">
@@ -12,8 +12,8 @@
 <title>@madeby.janice — Collab Scheduler</title>
 <style>
   :root{
-    --bg:#faf7f2; --card:#ffffff; --ink:#2d2a26; --muted:#8a8175;
-    --accent:#c2603e; --accent-soft:#f6e3d9; --line:#ece5da;
+    --bg:#f4f3f1; --card:#ffffff; --ink:#141414; --muted:#757571;
+    --accent:#141414; --accent-soft:#e9e7e3; --line:#e7e5e1;
     --green:#3d8b5f; --green-soft:#e2f2e8;
     --blue:#3f6fae; --blue-soft:#e3ecf8;
     --orange:#d07f2c; --orange-soft:#faeeda;
@@ -24,7 +24,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{overscroll-behavior-y:contain}
-  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-text-size-adjust:100%;
        padding:16px calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
        padding-top:calc(16px + env(safe-area-inset-top))}
   header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px}
@@ -64,10 +64,10 @@
   /* table */
   .tablewrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:auto;-webkit-overflow-scrolling:touch}
   table{width:100%;border-collapse:collapse;min-width:1180px}
-  th{position:sticky;top:0;background:#f3ede4;text-align:left;padding:10px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap;z-index:1}
+  th{position:sticky;top:0;background:#eceae7;text-align:left;padding:10px;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);white-space:nowrap;z-index:1}
   td{padding:10px;border-top:1px solid var(--line);vertical-align:top;white-space:nowrap}
   td.wrap{white-space:normal;min-width:150px;max-width:230px}
-  tbody tr:active{background:#fdf9f4} tbody tr:hover{background:#fdf9f4;cursor:pointer}
+  tbody tr:active{background:#f7f6f4} tbody tr:hover{background:#f7f6f4;cursor:pointer}
   .badge{display:inline-block;padding:3px 9px;border-radius:20px;font-size:11.5px;font-weight:600;white-space:nowrap}
   .chip{display:inline-block;background:var(--gray-soft);border-radius:6px;padding:2px 7px;font-size:11px;margin:1px 2px 1px 0}
   .datecell{display:flex;flex-direction:column;gap:2px}
@@ -119,12 +119,57 @@
   .field textarea{resize:vertical;min-height:54px}
   .checks{display:flex;flex-wrap:wrap;gap:6px}
   .checks label{display:flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:20px;padding:6px 12px;font-size:13px;cursor:pointer;user-select:none}
-  .checks label:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+  .checks label:has(input:checked){background:var(--ink);border-color:var(--ink);color:#fff;font-weight:600}
   .checks input{display:none}
   .modalfoot{display:flex;justify-content:space-between;margin-top:6px;gap:8px}
   .modalfoot .right{display:flex;gap:8px}
   .note{font-size:12px;color:var(--muted);line-height:1.5}
   .note code{background:var(--gray-soft);padding:1px 5px;border-radius:4px;font-size:11.5px}
+  /* Next up (home) */
+  .nextcard{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px}
+  .nexthead{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+  .nexthead b{font-size:14.5px}
+  .linkbtn{border:none;background:none;color:var(--muted);font-size:12.5px;cursor:pointer;min-height:32px;font-weight:600}
+  .nu{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line);cursor:pointer}
+  .nu:first-child{border-top:none}
+  .nutype{font-size:10.5px;font-weight:700;letter-spacing:.05em}
+  .nubrand{font-weight:600;font-size:13.5px;margin-left:4px}
+  .nudate{font-size:12px;color:var(--muted);white-space:nowrap}
+  .nulate{color:var(--red);font-weight:700}
+  /* empty-field indicator dot */
+  .reqdot{display:none;width:8px;height:8px;border-radius:50%;background:var(--red);margin-left:6px;vertical-align:middle}
+  .reqdot.on{display:inline-block}
+  /* create vs edit form modes */
+  .modal.creating .edit-only{display:none}
+  /* brief PDF attach */
+  .pdfrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .pdfchip{display:inline-flex;align-items:center;gap:10px;background:var(--gray-soft);border-radius:8px;padding:7px 11px;font-size:12.5px;max-width:100%}
+  .pdfchip b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
+  /* deliverable sub-options */
+  .subopts{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .subopts[hidden]{display:none}
+  .sublbl{font-size:11.5px;color:var(--muted);font-weight:600}
+  .subpill{border:1px solid var(--line);background:var(--card);border-radius:20px;padding:6px 12px;font-size:12.5px;cursor:pointer;min-height:32px;color:var(--ink)}
+  .subpill.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  /* form section headers */
+  .fgroup{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin:14px 0 8px}
+  .fgroup:first-of-type{margin-top:0}
+  /* snackbar (undo/toast) */
+  .snack{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom));background:var(--ink);color:#fff;
+    padding:11px 16px;border-radius:10px;display:flex;gap:16px;align-items:center;z-index:60;box-shadow:0 4px 16px rgba(45,42,38,.3);font-size:13.5px;max-width:92vw}
+  .snack[hidden]{display:none}
+  .snackbtn{background:none;border:none;color:#ffffff;text-decoration:underline;font-weight:700;cursor:pointer;font-size:13.5px;min-height:32px}
+  @media(min-width:761px){.snack{bottom:24px}}
+  /* collab progress */
+  .prog{height:4px;background:var(--line);border-radius:4px;margin:8px 0;overflow:hidden}
+  .prog i{display:block;height:100%;background:var(--green);border-radius:4px}
+  /* quick status advance */
+  .nextbtn{white-space:nowrap;background:var(--accent-soft);color:var(--accent)}
+  .nextbtn-sm{border:none;background:var(--gray-soft);border-radius:6px;cursor:pointer;padding:4px 7px;font-size:12px;margin-left:4px;min-height:26px}
+  .nextbtn-sm:hover{background:var(--accent-soft)}
+  /* inline field error */
+  .ferr{color:var(--red);font-size:11.5px;font-weight:600}
+  .ferr[hidden]{display:none}
   /* bottom tab nav (mobile only) */
   .bottomnav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:40;background:var(--card);border-top:1px solid var(--line);
     padding:6px 8px calc(6px + env(safe-area-inset-bottom));box-shadow:0 -2px 12px rgba(45,42,38,.06)}
@@ -134,7 +179,7 @@
   .bottomnav button.active{color:var(--accent)}
   .bottomnav .navfab{flex:0 0 62px;margin-top:-22px}
   .bottomnav .navfab i{display:flex;align-items:center;justify-content:center;width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;
-    font-size:28px;font-style:normal;font-weight:700;box-shadow:0 4px 12px rgba(194,96,62,.4)}
+    font-size:28px;font-style:normal;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.28)}
   /* Lainnya tab */
   #secMore{display:none}
   .morelist{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
@@ -174,6 +219,11 @@
 
 <section id="secHome">
 <div class="dash" id="dash"></div>
+
+<div class="nextcard">
+  <div class="nexthead"><b>⏭ Berikutnya</b><button class="linkbtn" onclick="goSchedule()">Lihat jadwal →</button></div>
+  <div id="nextup"></div>
+</div>
 
 <div class="quickadd">
   <span style="align-self:center">⚡</span>
@@ -225,6 +275,8 @@
   </div>
 </section>
 
+<div class="snack" id="snack" hidden role="status"><span id="snackMsg"></span><button class="snackbtn" id="snackAct" hidden></button></div>
+
 <nav class="bottomnav" id="bottomnav">
   <button id="nav-home" onclick="setTab('home')">🏠<span>Home</span></button>
   <button id="nav-collabs" onclick="setTab('collabs')">📋<span>Collabs</span></button>
@@ -235,41 +287,57 @@
 
 <!-- Collab modal -->
 <div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
-  <div class="modal">
+  <div class="modal" id="modalBox">
     <h2 id="modalTitle">Tambah Collab</h2>
     <input type="hidden" id="m_id">
+    <div class="fgroup">Info Dasar</div>
     <div class="grid2">
       <div class="field"><label>Tanggal (deal/mulai)</label><input type="date" id="m_tanggal"></div>
-      <div class="field"><label>Brand</label><input id="m_brand" list="brandList" placeholder="Nama brand"><datalist id="brandList"></datalist></div>
-      <div class="field"><label>Jenis Collab</label><input id="m_jenis" list="jenisList" placeholder="Paid Promote / Barter / …"><datalist id="jenisList">
-        <option>Paid Promote</option><option>Barter Produk</option><option>Endorsement</option><option>Affiliate</option><option>Brand Ambassador</option><option>Event / Cooking Demo</option>
-      </datalist></div>
-      <div class="field"><label>Produk</label><input id="m_produk" placeholder="Produk yang di-highlight"></div>
-    </div>
-    <div class="field"><label>KSP / Key Selling Point</label><textarea id="m_ksp" placeholder="Poin utama yang wajib disebut"></textarea></div>
-    <div class="grid2">
-      <div class="field"><label>Menu</label><input id="m_menu" placeholder="Menu yang dimasak"></div>
+      <div class="field"><label>Brand <i class="reqdot" id="dot_brand"></i></label><input id="m_brand" list="brandList" placeholder="Nama brand" aria-describedby="e_brand"><span class="ferr" id="e_brand" hidden>Nama brand wajib diisi — isi dulu sebelum menyimpan.</span><datalist id="brandList"></datalist></div>
+      <div class="field"><label>Jenis Collab</label><select id="m_jenis"></select></div>
       <div class="field"><label>Status</label><select id="m_status"></select></div>
     </div>
-    <div class="field"><label>Deliverables</label><div class="checks" id="m_deliv"></div></div>
-    <div class="grid4">
-      <div class="field"><label>🍳 Tgl Masak</label><input type="date" id="m_masak"></div>
-      <div class="field"><label>📤 Kirim Draft</label><input type="date" id="m_draft"></div>
-      <div class="field"><label>✅ Approval</label><input type="date" id="m_approval"></div>
-      <div class="field"><label>📱 Posting</label><input type="date" id="m_posting"></div>
+    <div class="fgroup">Konten</div>
+    <div class="field edit-only"><label>Produk <i class="reqdot" id="dot_produk"></i></label><input id="m_produk" placeholder="Produk yang di-highlight"></div>
+    <div class="field edit-only"><label>KSP / Key Selling Point <i class="reqdot" id="dot_ksp"></i></label><textarea id="m_ksp" placeholder="Poin utama yang wajib disebut"></textarea></div>
+    <div class="field edit-only"><label>Menu <i class="reqdot" id="dot_menu"></i></label><input id="m_menu" placeholder="Menu yang dimasak"></div>
+    <div class="field"><label>Deliverables <i class="reqdot" id="dot_deliv"></i></label><div class="checks" id="m_deliv"></div>
+      <div class="subopts" id="sub_reels" hidden></div>
+      <div class="subopts" id="sub_tt" hidden></div>
+      <input type="hidden" id="m_reelsTag"><input type="hidden" id="m_ttOpt">
     </div>
-    <div class="grid2">
+    <div class="fgroup">Timeline</div>
+    <div class="grid4">
+      <div class="field edit-only"><label>🍳 Tgl Masak <i class="reqdot" id="dot_masak"></i></label><input type="date" id="m_masak"></div>
+      <div class="field edit-only"><label>📤 Kirim Draft <i class="reqdot" id="dot_draft"></i></label><input type="date" id="m_draft"></div>
+      <div class="field edit-only"><label>✅ Approval <i class="reqdot" id="dot_approval"></i></label><input type="date" id="m_approval"></div>
+      <div class="field"><label>📱 Posting <i class="reqdot" id="dot_posting"></i></label><input type="date" id="m_posting"></div>
+    </div>
+    <div class="fgroup edit-only">Pembayaran</div>
+    <div class="grid2 edit-only">
       <div class="field"><label>Fee (Rp)</label><input type="number" inputmode="numeric" id="m_fee" min="0" step="50000" placeholder="0"></div>
       <div class="field"><label>Status Pembayaran</label><select id="m_bayar"></select></div>
     </div>
-    <div class="grid2">
-      <div class="field"><label>Link Brief</label><input type="url" id="m_lbrief" placeholder="https://…"></div>
-      <div class="field"><label>Link Draft</label><input type="url" id="m_ldraft" placeholder="https://…"></div>
+    <div class="fgroup">Brief &amp; Catatan</div>
+    <div class="field"><label>Link Brief</label><input type="url" id="m_lbrief" placeholder="https://…"></div>
+    <div class="field"><label>PDF Brief (maks 3 MB)</label>
+      <div class="pdfrow">
+        <button type="button" class="btn small" id="pdfAttachBtn" onclick="document.getElementById('briefFile').click()">📎 Lampirkan PDF</button>
+        <span class="pdfchip" id="pdfAttached" hidden>📄 <b id="pdfName"></b>
+          <button type="button" class="linkbtn" style="min-height:24px" onclick="downloadBriefPdf()">Unduh</button>
+          <button type="button" class="linkbtn" style="min-height:24px;color:var(--red)" onclick="removeBriefPdf()" aria-label="Hapus PDF">Hapus</button>
+        </span>
+      </div>
+      <input type="file" id="briefFile" accept="application/pdf" style="display:none" onchange="onBriefPdf(event)">
+      <input type="hidden" id="m_briefPdf"><input type="hidden" id="m_briefPdfName">
     </div>
-    <div class="field"><label>Link Posting</label><input type="url" id="m_lpost" placeholder="https://…"></div>
+    <div class="field edit-only"><label>Link Posting</label><input type="url" id="m_lpost" placeholder="https://…"></div>
     <div class="field"><label>Catatan</label><textarea id="m_catatan" placeholder="Revisi, kontak PIC, dll."></textarea></div>
     <div class="modalfoot">
+      <span>
       <button class="btn" id="btnDelete" style="background:var(--red-soft);color:var(--red)" onclick="deleteRow()">Hapus</button>
+      <button class="btn" id="btnDup" onclick="duplicateRow()" title="Salin collab ini untuk brand yang sama">📄 Duplikat</button>
+      </span>
       <div class="right">
         <button class="btn ghost" onclick="closeModal()">Batal</button>
         <button class="btn primary" onclick="saveRow()">Simpan</button>
@@ -303,20 +371,25 @@
 <script>
 'use strict';
 /* ================= constants ================= */
-const STATUSES = ['Inquiry','Brief Received','Cooking','Editing','Draft Sent','Revision','Approved','Scheduled','Posted','Paid','Completed'];
+const STATUSES = ['Brief Received','Draft Sent','Approved','Posted'];
+const STATUS_MIG = {'Inquiry':'Brief Received','Cooking':'Brief Received','Editing':'Brief Received','Revision':'Draft Sent','Scheduled':'Approved','Paid':'Posted','Completed':'Posted'};
 const STATUS_COLOR = {
-  'Inquiry':['var(--gray-soft)','var(--gray)'],'Brief Received':['var(--purple-soft)','var(--purple)'],
-  'Cooking':['var(--orange-soft)','var(--orange)'],'Editing':['var(--orange-soft)','var(--orange)'],
-  'Draft Sent':['var(--blue-soft)','var(--blue)'],'Revision':['var(--red-soft)','var(--red)'],
-  'Approved':['var(--blue-soft)','var(--blue)'],'Scheduled':['var(--purple-soft)','var(--purple)'],
-  'Posted':['var(--green-soft)','var(--green)'],'Paid':['var(--green-soft)','var(--green)'],'Completed':['var(--green-soft)','var(--green)']
+  'Brief Received':['var(--gray-soft)','var(--gray)'],
+  'Draft Sent':['var(--blue-soft)','var(--blue)'],
+  'Approved':['var(--orange-soft)','var(--orange)'],
+  'Posted':['var(--green-soft)','var(--green)']
 };
 const PAYMENTS = ['Belum Invoice','Invoice Terkirim','DP','Lunas','Barter (non-fee)'];
 const PAY_COLOR = {
   'Belum Invoice':['var(--red-soft)','var(--red)'],'Invoice Terkirim':['var(--orange-soft)','var(--orange)'],
   'DP':['var(--blue-soft)','var(--blue)'],'Lunas':['var(--green-soft)','var(--green)'],'Barter (non-fee)':['var(--gray-soft)','var(--gray)']
 };
-const DELIVERABLES = ['Reels','TikTok','Feed','Story','YouTube Shorts','Foto'];
+const JENIS_LIST = ['Paid Collab','Barter Collab','Brand Ambassador','Event / Cooking Demo'];
+const JENIS_MIG = {'Paid Promote':'Paid Collab','Barter Produk':'Barter Collab','Endorsement':'Paid Collab','Affiliate':'Paid Collab'};
+const DELIVERABLES = ['IG Reels','IG Story','TikTok','Content Owning'];
+const DELIV_MIG = {'Reels':'IG Reels','Story':'IG Story','Feed':null,'Foto':null,'YouTube Shorts':null};
+const REELS_OPTS = ['With collab tag','No collab tag'];
+const TT_OPTS = ['Yellow cart','Boost code'];
 const MONTHS_ID = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const DOW_ID = ['Min','Sen','Sel','Rab','Kam','Jum','Sab'];
 const KEY = 'janice_scheduler_v3';
@@ -347,7 +420,19 @@ function sampleData(){
   ];
 }
 
-let rows = loadRows() || [];
+function migrateRow(r){
+  if(STATUS_MIG[r.status]) r.status=STATUS_MIG[r.status];
+  if(!STATUSES.includes(r.status)) r.status='Brief Received';
+  if(Array.isArray(r.deliv)) r.deliv=r.deliv.map(d=>Object.prototype.hasOwnProperty.call(DELIV_MIG,d)?DELIV_MIG[d]:d).filter(d=>d&&DELIVERABLES.includes(d));
+  if(r.reelsTag===undefined) r.reelsTag='';
+  if(r.ttOpt===undefined) r.ttOpt='';
+  if(JENIS_MIG[r.jenis]) r.jenis=JENIS_MIG[r.jenis];
+  if(r.jenis && !JENIS_LIST.includes(r.jenis)) r.jenis='Paid Collab';
+  if(r.briefPdf===undefined) r.briefPdf='';
+  if(r.briefPdfName===undefined) r.briefPdfName='';
+  return r;
+}
+let rows = (loadRows() || []).map(migrateRow);
 persist();
 
 /* ================= helpers ================= */
@@ -371,15 +456,13 @@ function renderDash(){
   const draftPending=A.filter(r=>statusIdx(r.status)>=0 && statusIdx(r.status)<statusIdx('Draft Sent')).length;
   const notPosted=A.filter(r=>statusIdx(r.status)<statusIdx('Posted')).length;
   const unpaid=A.filter(r=>r.fee>0 && r.bayar!=='Lunas').length;
-  const income=thisMonth.reduce((s,r)=>s+(Number(r.fee)||0),0);
   const late=A.filter(r=>{const f=flags(r);return f.draft==='late'||f.posting==='late';}).length;
   $('dash').innerHTML=`
     <div class="stat"><div class="label">Collab bulan ini (${MONTHS_ID[now.getMonth()]})</div><div class="value">${thisMonth.length}</div></div>
     <div class="stat"><div class="label">Draft belum dikirim</div><div class="value ${draftPending?'warn':''}">${draftPending}</div></div>
     <div class="stat"><div class="label">Belum posting</div><div class="value">${notPosted}</div></div>
     <div class="stat"><div class="label">Deadline terlewat ⚠️</div><div class="value ${late?'warn':''}">${late}</div></div>
-    <div class="stat"><div class="label">Invoice belum lunas</div><div class="value ${unpaid?'warn':''}">${unpaid}</div></div>
-    <div class="stat"><div class="label">Potensi pendapatan bln ini</div><div class="value money">${fmtRp(income)}</div></div>`;
+    <div class="stat"><div class="label">Invoice belum lunas</div><div class="value ${unpaid?'warn':''}">${unpaid}</div></div>`;
 }
 
 /* ================= filters ================= */
@@ -415,8 +498,28 @@ function dateCell(dateStr,flag,label){
   else if(flag==='soon') h+=`<span class="flag soon">⏰ ${label}</span>`;
   return h+'</div>';
 }
+function goSchedule(){ if(isMobile()) setTab('jadwal'); else setView('cal'); }
+function renderNextUp(){
+  const box=$('nextup'); if(!box) return;
+  const t=todayISO(), evs=[];
+  activeRows().forEach(r=>{
+    const f=flags(r);
+    [['masak','🍳 MASAK','var(--orange)',false],
+     ['draft','📤 DRAFT','var(--blue)',f.draft==='late'],
+     ['posting','📱 POSTING','var(--green)',f.posting==='late']].forEach(([k,lbl,c,late])=>{
+      if(!r[k]) return;
+      if(r[k]>=t || late) evs.push({date:r[k],lbl,c,late,brand:r.brand,id:r.id});
+    });
+  });
+  evs.sort((a,b)=>a.date<b.date?-1:1);
+  const top=evs.slice(0,4);
+  box.innerHTML = top.length ? top.map(e=>`<div class="nu" onclick="openModal('${e.id}')">
+    <span><span class="nutype" style="color:${e.c}">${e.lbl}</span><span class="nubrand">${esc(e.brand)}</span></span>
+    <span class="nudate">${e.late?'<span class="nulate">LEWAT · </span>':''}${fmtDate(e.date)}</span>
+  </div>`).join('') : '<div style="color:var(--muted);font-size:13px;padding:6px 0">Tidak ada jadwal terdekat 🎉</div>';
+}
 function render(){
-  renderDash(); renderFilters();
+  renderDash(); renderFilters(); renderNextUp();
   const data=filteredRows();
   $('emptyMsg').style.display=data.length?'none':'block';
   // table
@@ -426,35 +529,37 @@ function render(){
       <td>${fmtDate(r.tanggal)}</td><td><b>${esc(r.brand)}</b></td><td>${esc(r.jenis||'—')}</td>
       <td class="wrap"><b>${esc(r.produk||'')}</b>${r.ksp?`<br><span style="color:var(--muted);font-size:12px">${esc(r.ksp)}</span>`:''}</td>
       <td class="wrap">${esc(r.menu||'—')}</td>
-      <td class="wrap">${(r.deliv||[]).map(d=>`<span class="chip">${esc(d)}</span>`).join('')||'—'}</td>
+      <td class="wrap">${((r.deliv||[]).map(d=>`<span class="chip">${esc(d)}</span>`).join('')+(r.reelsTag?`<span class="chip">${esc(r.reelsTag)}</span>`:'')+(r.ttOpt?`<span class="chip">${esc(r.ttOpt)}</span>`:''))||'—'}</td>
       <td>${fmtDate(r.masak)}</td>
       <td>${dateCell(r.draft,f.draft,dD===0?'Hari ini':'H-'+dD)}</td>
       <td>${fmtDate(r.approval)}</td>
       <td>${dateCell(r.posting,f.posting,dP===0?'Hari ini':'H-'+dP)}</td>
-      <td>${badge(r.status,STATUS_COLOR[r.status]||['#eee','#555'])}</td>
+      <td>${badge(r.status,STATUS_COLOR[r.status]||['#eee','#555'])}${nextStatus(r.status)?` <button class="nextbtn-sm" title="Naik ke ${esc(nextStatus(r.status))}" aria-label="Naik ke ${esc(nextStatus(r.status))}" onclick="event.stopPropagation();advanceStatus('${r.id}')">⏩</button>`:''}</td>
       <td class="fee">${fmtRp(r.fee)}</td>
       <td>${r.bayar?badge(r.bayar,PAY_COLOR[r.bayar]||['#eee','#555']):'—'}</td>
       <td class="links" onclick="event.stopPropagation()">
         ${r.lbrief?`<a href="${esc(r.lbrief)}" target="_blank" rel="noopener">Brief</a>`:''}
-        ${r.ldraft?`<a href="${esc(r.ldraft)}" target="_blank" rel="noopener">Draft</a>`:''}
+        ${r.briefPdf?`<a href="#" onclick="event.preventDefault();dlRowPdf('${r.id}')">PDF</a>`:''}
         ${r.lpost?`<a href="${esc(r.lpost)}" target="_blank" rel="noopener">Post</a>`:''}
       </td></tr>`;
   }).join('');
   // cards (mobile)
   $('cardsView').innerHTML=data.map(r=>{
     const f=flags(r), dD=daysUntil(r.draft), dP=daysUntil(r.posting);
+    const ns=nextStatus(r.status), pct=Math.max(4,Math.round(statusIdx(r.status)/(STATUSES.length-1)*100));
     const dflag=f.draft==='late'?'<span class="flag late">⚠ draft lewat</span>':f.draft==='soon'?`<span class="flag soon">⏰ draft ${dD===0?'hari ini':'H-'+dD}</span>`:'';
     const pflag=f.posting==='late'?'<span class="flag late">⚠ posting lewat</span>':f.posting==='soon'?`<span class="flag soon">⏰ posting ${dP===0?'hari ini':'H-'+dP}</span>`:'';
     return `<div class="ccard" onclick="openModal('${r.id}')">
       <div class="top"><div><div class="brand">${esc(r.brand)}</div><div class="meta">${esc(r.jenis||'')}${r.menu?' · '+esc(r.menu):''}</div></div>${badge(r.status,STATUS_COLOR[r.status]||['#eee','#555'])}</div>
-      ${(r.deliv||[]).map(d=>`<span class="chip">${esc(d)}</span>`).join('')}
+      ${(r.deliv||[]).map(d=>`<span class="chip">${esc(d)}</span>`).join('')}${r.reelsTag?`<span class="chip">${esc(r.reelsTag)}</span>`:''}${r.ttOpt?`<span class="chip">${esc(r.ttOpt)}</span>`:''}
       <div class="dts" style="margin-top:8px">
         <div><b>🍳 Masak</b><br>${fmtDate(r.masak)}</div>
         <div><b>📤 Draft</b><br>${fmtDate(r.draft)} ${dflag}</div>
         <div><b>✅ Approval</b><br>${fmtDate(r.approval)}</div>
         <div><b>📱 Posting</b><br>${fmtDate(r.posting)} ${pflag}</div>
       </div>
-      <div class="foot"><span class="fee">${fmtRp(r.fee)}</span>${r.bayar?badge(r.bayar,PAY_COLOR[r.bayar]||['#eee','#555']):''}</div>
+      <div class="prog" aria-label="Progress ${esc(r.status)}"><i style="width:${pct}%"></i></div>
+      <div class="foot"><span class="fee">${fmtRp(r.fee)}</span><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">${r.bayar?badge(r.bayar,PAY_COLOR[r.bayar]||['#eee','#555']):''}${ns?`<button class="btn small nextbtn" aria-label="Naik ke ${esc(ns)}" onclick="event.stopPropagation();advanceStatus('${r.id}')">⏩ ${esc(ns)}</button>`:''}</span></div>
     </div>`;
   }).join('');
   renderCal();
@@ -525,51 +630,148 @@ function renderCal(){
 /* ================= modal ================= */
 function buildStatic(){
   $('m_status').innerHTML=STATUSES.map(s=>`<option>${s}</option>`).join('');
+  $('m_jenis').innerHTML=JENIS_LIST.map(s=>`<option>${s}</option>`).join('');
   $('m_bayar').innerHTML=PAYMENTS.map(s=>`<option>${s}</option>`).join('');
   $('m_deliv').innerHTML=DELIVERABLES.map(d=>`<label><input type="checkbox" value="${d}"><span>${d}</span></label>`).join('');
+  $('sub_reels').innerHTML='<span class="sublbl">IG Reels:</span>'+REELS_OPTS.map(v=>`<button type="button" class="subpill" data-f="m_reelsTag" data-v="${v}" onclick="setSub(this)">${v}</button>`).join('');
+  $('sub_tt').innerHTML='<span class="sublbl">TikTok:</span>'+TT_OPTS.map(v=>`<button type="button" class="subpill" data-f="m_ttOpt" data-v="${v}" onclick="setSub(this)">${v}</button>`).join('');
+  document.querySelectorAll('#m_deliv input').forEach(cb=>cb.addEventListener('change',refreshSubs));
+}
+function onBriefPdf(ev){
+  const file=ev.target.files[0]; ev.target.value='';
+  if(!file) return;
+  if(file.type!=='application/pdf'){ toast('File harus berformat PDF.'); return; }
+  if(file.size>3*1024*1024){ toast('PDF terlalu besar — maksimal 3 MB.'); return; }
+  const rd=new FileReader();
+  rd.onload=e=>{ $('m_briefPdf').value=e.target.result; $('m_briefPdfName').value=file.name; renderBriefPdf(); toast('PDF terlampir ✓'); };
+  rd.readAsDataURL(file);
+}
+function renderBriefPdf(){
+  const has=!!$('m_briefPdf').value;
+  $('pdfAttached').hidden=!has;
+  $('pdfAttachBtn').hidden=has;
+  if(has) $('pdfName').textContent=$('m_briefPdfName').value||'brief.pdf';
+}
+function dlRowPdf(id){
+  const r=rows.find(x=>x.id===id); if(!r||!r.briefPdf) return;
+  const a=document.createElement('a'); a.href=r.briefPdf; a.download=r.briefPdfName||'brief.pdf'; a.click();
+}
+function downloadBriefPdf(){
+  const data=$('m_briefPdf').value; if(!data) return;
+  const a=document.createElement('a'); a.href=data; a.download=$('m_briefPdfName').value||'brief.pdf'; a.click();
+}
+function removeBriefPdf(){ $('m_briefPdf').value=''; $('m_briefPdfName').value=''; renderBriefPdf(); }
+const DOT_FIELDS=[
+  ['dot_brand',()=>$('m_brand').value.trim()],
+  ['dot_produk',()=>$('m_produk').value.trim()],
+  ['dot_ksp',()=>$('m_ksp').value.trim()],
+  ['dot_menu',()=>$('m_menu').value.trim()],
+  ['dot_deliv',()=>document.querySelectorAll('#m_deliv input:checked').length],
+  ['dot_masak',()=>$('m_masak').value],
+  ['dot_draft',()=>$('m_draft').value],
+  ['dot_approval',()=>$('m_approval').value],
+  ['dot_posting',()=>$('m_posting').value]
+];
+function updateDots(){ DOT_FIELDS.forEach(([id,fn])=>{ const el=$(id); if(el) el.classList.toggle('on', !fn()); }); }
+function setSub(btn){ const inp=$(btn.dataset.f); inp.value = inp.value===btn.dataset.v ? '' : btn.dataset.v; refreshSubs(); }
+function refreshSubs(){
+  const checked=[...document.querySelectorAll('#m_deliv input:checked')].map(c=>c.value);
+  $('sub_reels').hidden=!checked.includes('IG Reels');
+  $('sub_tt').hidden=!checked.includes('TikTok');
+  document.querySelectorAll('.subpill').forEach(b=>b.classList.toggle('on', $(b.dataset.f).value===b.dataset.v));
+  updateDots();
 }
 function openModal(id,prefill){
   const r=id?rows.find(x=>x.id===id):null;
   $('modalTitle').textContent=r?'Edit — '+(r.brand||''):'Tambah Collab';
+  $('modalBox').classList.toggle('creating', !r);
   $('btnDelete').style.display=r?'inline-block':'none';
+  $('btnDup').style.display=r?'inline-block':'none';
+  $('e_brand').hidden=true;
   const v=r||prefill||{};
   $('m_id').value=r?r.id:'';
   $('m_tanggal').value=v.tanggal||todayISO();
-  $('m_brand').value=v.brand||''; $('m_jenis').value=v.jenis||'';
+  $('m_brand').value=v.brand||''; $('m_jenis').value=(v.jenis&&JENIS_LIST.includes(v.jenis))?v.jenis:'Paid Collab';
   $('m_produk').value=v.produk||''; $('m_ksp').value=v.ksp||'';
-  $('m_menu').value=v.menu||''; $('m_status').value=v.status||'Inquiry';
+  $('m_menu').value=v.menu||''; $('m_status').value=(v.status&&STATUSES.includes(v.status))?v.status:'Brief Received';
   $('m_masak').value=v.masak||''; $('m_draft').value=v.draft||'';
   $('m_approval').value=v.approval||''; $('m_posting').value=v.posting||'';
   $('m_fee').value=v.fee||''; $('m_bayar').value=v.bayar||'Belum Invoice';
-  $('m_lbrief').value=v.lbrief||''; $('m_ldraft').value=v.ldraft||''; $('m_lpost').value=v.lpost||'';
+  $('m_lbrief').value=v.lbrief||''; $('m_lpost').value=v.lpost||'';
+  $('m_briefPdf').value=v.briefPdf||''; $('m_briefPdfName').value=v.briefPdfName||'';
+  renderBriefPdf();
   $('m_catatan').value=v.catatan||'';
   document.querySelectorAll('#m_deliv input').forEach(cb=>cb.checked=(v.deliv||[]).includes(cb.value));
+  $('m_reelsTag').value=v.reelsTag||''; $('m_ttOpt').value=v.ttOpt||'';
+  refreshSubs();
+  updateDots();
   $('overlay').classList.add('open');
 }
 function closeModal(){ $('overlay').classList.remove('open'); }
 function saveRow(){
   const brand=$('m_brand').value.trim();
-  if(!brand){ alert('Nama brand wajib diisi.'); return; }
+  if(!brand){ $('e_brand').hidden=false; $('m_brand').focus(); return; }
   const data={
     tanggal:$('m_tanggal').value, brand, jenis:$('m_jenis').value.trim(),
     produk:$('m_produk').value.trim(), ksp:$('m_ksp').value.trim(), menu:$('m_menu').value.trim(),
     deliv:[...document.querySelectorAll('#m_deliv input:checked')].map(c=>c.value),
+    reelsTag:$('m_reelsTag').value, ttOpt:$('m_ttOpt').value,
     masak:$('m_masak').value, draft:$('m_draft').value, approval:$('m_approval').value, posting:$('m_posting').value,
     status:$('m_status').value, fee:Number($('m_fee').value)||0, bayar:$('m_bayar').value,
-    lbrief:$('m_lbrief').value.trim(), ldraft:$('m_ldraft').value.trim(), lpost:$('m_lpost').value.trim(),
+    lbrief:$('m_lbrief').value.trim(), lpost:$('m_lpost').value.trim(),
+    briefPdf:$('m_briefPdf').value, briefPdfName:$('m_briefPdfName').value,
     catatan:$('m_catatan').value.trim()
   };
   const id=$('m_id').value;
-  if(id){ const i=rows.findIndex(r=>r.id===id); rows[i]=Object.assign({},rows[i],data,{updated_at:nowStamp(),_dirty:true,_deleted:false}); }
+  let prevStatus=null, prevBayar=null;
+  if(id){ const i=rows.findIndex(r=>r.id===id); prevStatus=rows[i].status; prevBayar=rows[i].bayar; rows[i]=Object.assign({},rows[i],data,{updated_at:nowStamp(),_dirty:true,_deleted:false}); }
   else { rows.push(Object.assign({id:uid(),updated_at:nowStamp(),_dirty:true,_deleted:false},data)); }
   persist(); closeModal(); render(); pushDirty();
+  if(data.status!==prevStatus) maybeCelebrate(data.status,data.brand);
+  if(data.bayar==='Lunas' && prevBayar!=='Lunas') toast('💰 Pembayaran '+data.brand+' lunas!',3500);
 }
 function deleteRow(){
   const id=$('m_id').value;
-  if(!confirm('Hapus collab ini?')) return;
-  const i=rows.findIndex(r=>r.id===id);
-  if(i>=0){ rows[i]._deleted=true; rows[i].updated_at=nowStamp(); rows[i]._dirty=true; }
+  const r=rows.find(x=>x.id===id); if(!r) return;
+  r._deleted=true; r.updated_at=nowStamp(); r._dirty=true;
   persist(); closeModal(); render(); pushDirty();
+  toast('Collab "'+(r.brand||'')+'" dihapus', 6000, 'Urungkan', ()=>{
+    r._deleted=false; r.updated_at=nowStamp(); r._dirty=true;
+    persist(); render(); pushDirty(); toast('Dikembalikan ✓');
+  });
+}
+function duplicateRow(){
+  const id=$('m_id').value;
+  const r=rows.find(x=>x.id===id); if(!r) return;
+  const copy=Object.assign({}, r, {tanggal:todayISO(), masak:'', draft:'', approval:'', posting:'', status:'Brief Received', lbrief:'', lpost:'', briefPdf:'', briefPdfName:'', bayar:r.bayar==='Barter (non-fee)'?'Barter (non-fee)':'Belum Invoice'});
+  delete copy.id; delete copy.updated_at; delete copy._dirty; delete copy._deleted;
+  closeModal(); openModal(null, copy);
+  toast('Data disalin — atur tanggal & simpan');
+}
+function nextStatus(st){ const i=statusIdx(st); return (i>=0 && i<STATUSES.length-1) ? STATUSES[i+1] : null; }
+function advanceStatus(id){
+  const r=rows.find(x=>x.id===id); if(!r) return;
+  const ns=nextStatus(r.status); if(!ns) return;
+  const prev=r.status;
+  r.status=ns; r.updated_at=nowStamp(); r._dirty=true;
+  persist(); render(); pushDirty();
+  toast(r.brand+': '+prev+' → '+ns, 5000, 'Urungkan', ()=>{
+    r.status=prev; r.updated_at=nowStamp(); r._dirty=true; persist(); render(); pushDirty();
+  });
+  maybeCelebrate(ns, r.brand);
+}
+function maybeCelebrate(st, brand){
+  if(st==='Posted') toast('🎉 Konten '+brand+' sudah tayang!', 3500);
+}
+let toastTimer=null;
+function toast(msg, ms, actionLabel, actionFn){
+  const sn=$('snack'), sm=$('snackMsg'), sa=$('snackAct');
+  sm.textContent=msg;
+  if(actionLabel){ sa.hidden=false; sa.textContent=actionLabel; sa.onclick=()=>{ sn.hidden=true; if(actionFn) actionFn(); }; }
+  else { sa.hidden=true; sa.onclick=null; }
+  sn.hidden=false;
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>{ sn.hidden=true; }, ms||2500);
 }
 
 /* ================= quick add ================= */
@@ -603,9 +805,9 @@ function quickAdd(){
 /* ================= export/import ================= */
 function download(name,content,type){ const b=new Blob([content],{type}), a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=name; a.click(); URL.revokeObjectURL(a.href); }
 function exportCSV(){
-  const head=['Tanggal','Brand','Jenis Collab','Produk','KSP','Menu','Deliverables','Tgl Masak','Tgl Kirim Draft','Tgl Approval','Tgl Posting','Status','Fee','Status Pembayaran','Link Brief','Link Draft','Link Posting','Catatan'];
+  const head=['Tanggal','Brand','Jenis Collab','Produk','KSP','Menu','Deliverables','Tgl Masak','Tgl Kirim Draft','Tgl Approval','Tgl Posting','Status','Fee','Status Pembayaran','Link Brief','PDF Brief','Link Posting','Catatan'];
   const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
-  const lines=[head.map(q).join(',')].concat(activeRows().map(r=>[r.tanggal,r.brand,r.jenis,r.produk,r.ksp,r.menu,(r.deliv||[]).join('; '),r.masak,r.draft,r.approval,r.posting,r.status,r.fee,r.bayar,r.lbrief,r.ldraft,r.lpost,r.catatan].map(q).join(',')));
+  const lines=[head.map(q).join(',')].concat(activeRows().map(r=>[r.tanggal,r.brand,r.jenis,r.produk,r.ksp,r.menu,(r.deliv||[]).join('; '),r.masak,r.draft,r.approval,r.posting,r.status,r.fee,r.bayar,r.lbrief,r.briefPdfName,r.lpost,r.catatan].map(q).join(',')));
   download('madeby-janice-collabs.csv','﻿'+lines.join('\n'),'text/csv;charset=utf-8');
 }
 function exportJSON(){ download('madeby-janice-backup.json', JSON.stringify(rows,null,2), 'application/json'); }
@@ -667,7 +869,7 @@ async function syncNow(silent){
     (data||[]).forEach(rem=>{
       const loc=localById[rem.id];
       if(!loc || new Date(rem.updated_at)>new Date(loc.updated_at)){
-        const merged=Object.assign({}, rem.data||{}, {id:rem.id, updated_at:rem.updated_at, _deleted:!!rem.deleted, _dirty:false});
+        const merged=migrateRow(Object.assign({}, rem.data||{}, {id:rem.id, updated_at:rem.updated_at, _deleted:!!rem.deleted, _dirty:false}));
         if(loc){ Object.assign(loc,merged); } else { rows.push(merged); localById[rem.id]=merged; }
       }
     });
@@ -694,6 +896,8 @@ setTab('home');
 render();
 initCloud();
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeSettings(); } });
+$('m_brand').addEventListener('input',()=>{ $('e_brand').hidden=true; });
+['m_brand','m_produk','m_ksp','m_menu','m_masak','m_draft','m_approval','m_posting'].forEach(id=>$(id).addEventListener('input',updateDots));
 window.matchMedia('(max-width:760px)').addEventListener('change',()=>{ applyVisibility(); });
 </script>
 </body>

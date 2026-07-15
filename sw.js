@@ -1,5 +1,5 @@
 /* Service worker: offline-first cache untuk shell app. Data collab disimpan di localStorage + Supabase, bukan di cache. */
-const CACHE = 'janice-collab-v2';
+const CACHE = 'janice-collab-v5';
 const ASSETS = ['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install', e => {
   self.skipWaiting();
