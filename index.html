@@ -144,6 +144,7 @@
   /* brief PDF attach */
   .pdfrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
   .pdfchip{display:inline-flex;align-items:center;gap:10px;background:var(--gray-soft);border-radius:8px;padding:7px 11px;font-size:12.5px;max-width:100%}
+  .pdfchip[hidden]{display:none}
   .pdfchip b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px}
   /* deliverable sub-options */
   .subopts{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}
@@ -600,9 +601,10 @@ function setTab(t){
 function weekStart(d){ const x=new Date(d); const off=(x.getDay()+6)%7; x.setDate(x.getDate()-off); x.setHours(0,0,0,0); return x; }
 function weekKey(d){ return toISO(weekStart(d)); }
 function weekLabel(d){
-  const s=weekStart(d), e=new Date(s); e.setDate(e.getDate()+6);
-  const mS=MONTHS_ID[s.getMonth()].toUpperCase(), mE=MONTHS_ID[e.getMonth()].toUpperCase();
-  return s.getMonth()===e.getMonth() ? `${mS} ${s.getDate()} – ${e.getDate()}` : `${mS} ${s.getDate()} – ${mE} ${e.getDate()}`;
+  const s=weekStart(d);
+  const off=(new Date(s.getFullYear(),s.getMonth(),1).getDay()+6)%7;
+  const n=Math.ceil((s.getDate()+off)/7);
+  return MONTHS_ID[s.getMonth()].toUpperCase()+' WEEK '+n;
 }
 const AG_LBL={masak:'🍳 Masak', draft:'📤 Kirim Draft', posting:'📱 Posting'};
 function renderCal(){
