@@ -91,6 +91,9 @@
   .agenda{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px}
   .agwk{font-size:11.5px;font-weight:700;letter-spacing:.05em;color:var(--muted);text-transform:uppercase;margin:18px 0 8px;padding-left:56px}
   .agwk:first-child{margin-top:0}
+  .pastbtn{display:block;width:100%;text-align:left;background:none;border:0;font:inherit;font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding:0 0 10px 56px;cursor:pointer}
+  .pastbtn:active{opacity:.6}
+  .pastwrap{opacity:.55;padding-bottom:10px;margin-bottom:6px;border-bottom:1px solid var(--line)}
   .agrow{display:flex;gap:10px;margin-bottom:8px}
   .agdate{width:46px;flex:none;text-align:center;padding-top:6px}
   .agdate .dow{display:block;font-size:10.5px;color:var(--muted);text-transform:uppercase;font-weight:600}
@@ -607,15 +610,11 @@ function weekLabel(d){
   return MONTHS_ID[s.getMonth()].toUpperCase()+' WEEK '+n;
 }
 const AG_LBL={masak:'🍳 Masak', draft:'📤 Kirim Draft', posting:'📱 Posting'};
-function renderCal(){
-  const A=$('agenda'); if(!A) return;
-  const data=filteredRows(), events=[];
-  data.forEach(r=>{ ['masak','draft','posting'].forEach(k=>{ if(r[k]) events.push({date:r[k],type:k,brand:r.brand,menu:r.menu,status:r.status,id:r.id}); }); });
-  events.sort((a,b)=> a.date<b.date?-1 : a.date>b.date?1 : 0);
-  if(!events.length){ A.innerHTML='<div class="empty">Belum ada jadwal. Tambah collab dengan tanggal masak / kirim draft / posting.</div>'; return; }
-  const tISO=todayISO();
+let showPast=false;
+function togglePast(){ showPast=!showPast; renderCal(); }
+function agendaBlock(list,tISO){
   let html='', lastWeek='', lastDay='';
-  events.forEach(e=>{
+  list.forEach(e=>{
     const d=new Date(e.date+'T00:00:00'), wk=weekKey(d);
     if(wk!==lastWeek){ html+=`<div class="agwk">${weekLabel(d)}</div>`; lastWeek=wk; lastDay=''; }
     let col='<div class="agdate"></div>';
@@ -626,6 +625,23 @@ function renderCal(){
       <div class="agsub">${esc(sub||'—')}</div>
     </div></div>`;
   });
+  return html;
+}
+function renderCal(){
+  const A=$('agenda'); if(!A) return;
+  const data=filteredRows(), events=[];
+  data.forEach(r=>{ ['masak','draft','posting'].forEach(k=>{ if(r[k]) events.push({date:r[k],type:k,brand:r.brand,menu:r.menu,status:r.status,id:r.id}); }); });
+  events.sort((a,b)=> a.date<b.date?-1 : a.date>b.date?1 : 0);
+  if(!events.length){ A.innerHTML='<div class="empty">Belum ada jadwal. Tambah collab dengan tanggal masak / kirim draft / posting.</div>'; return; }
+  const tISO=todayISO();
+  const past=events.filter(e=>e.date<tISO), next=events.filter(e=>e.date>=tISO);
+  let html='';
+  if(past.length){
+    html+=`<button type="button" class="pastbtn" onclick="togglePast()">${showPast?'▾':'▸'} Jadwal lampau (${past.length})</button>`;
+    if(showPast) html+=`<div class="pastwrap">${agendaBlock(past,tISO)}</div>`;
+  }
+  html+= next.length ? agendaBlock(next,tISO)
+    : '<div class="empty">Tidak ada jadwal mendatang 🎉</div>';
   A.innerHTML=html;
 }
 
