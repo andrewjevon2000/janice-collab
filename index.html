@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#f4f3f1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -24,6 +24,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{overscroll-behavior-y:contain}
+  html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
   body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-text-size-adjust:100%;
        padding:16px calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
        padding-top:calc(16px + env(safe-area-inset-top))}
@@ -251,6 +252,8 @@
   .nreset{border:none;background:var(--orange-soft);color:var(--orange);font:inherit;font-size:12.5px;font-weight:700;border-radius:20px;padding:5px 12px;margin:0 0 10px;cursor:pointer;min-height:30px}
   @media(max-width:760px){
     .grid2,.grid4{grid-template-columns:1fr}
+    /* iOS auto-zoom kalau font kolom isian < 16px */
+    input,select,textarea,.field input,.field select,.field textarea,.toolbar input[type=search],.toolbar select,.quickadd input{font-size:16px}
     .feegrid{grid-template-columns:1fr;gap:0}
     .fstat{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line)}
     .fstat:first-child{border-top:none;padding-top:2px}
@@ -1258,6 +1261,9 @@ render();
 initCloud();
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(curNote){ closeNote(); return; } closeModal(); closeSettings(); } });
 $('n_text').addEventListener('keydown',onNoteKey);
+// kunci zoom: pinch (gesture* khusus Safari iOS) dan pinch multi-jari
+['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{ if(e.touches.length>1) e.preventDefault(); },{passive:false});
 $('nRead').addEventListener('click',onReaderClick);
 if(window.visualViewport){ visualViewport.addEventListener('resize',fitNed); visualViewport.addEventListener('scroll',fitNed); }
 // simpan resep saat app ditutup / pindah app
