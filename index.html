@@ -31,6 +31,9 @@
   *{box-sizing:border-box;margin:0;padding:0}
   [hidden]{display:none!important}
   html,body{overscroll-behavior-y:contain}
+  /* halaman tidak boleh bisa digeser ke samping */
+  html{overflow-x:hidden}
+  body{overflow-x:clip;max-width:100%}
   html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
   body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.45;
        font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
@@ -283,22 +286,27 @@
   .modal{display:flex;flex-direction:column;background:var(--card);border-radius:18px;width:100%;max-width:680px;max-height:calc(100vh - 48px);max-height:calc(100dvh - 48px);box-shadow:var(--float);overflow:hidden}
   .overlay.open .modal{animation:rise .32s var(--ease)}
   .modal.narrow{max-width:400px}
-  @keyframes fade{from{opacity:0}}
+  @keyframes fade{from{background-color:rgba(60,40,28,0)}}
   @keyframes rise{from{opacity:0;transform:translateY(12px)}}
   .mhead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 12px 12px 20px;border-bottom:1px solid var(--line);flex:none}
   .mhead h2{font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mbody{padding:20px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0;overscroll-behavior:contain}
+  .mbody{padding:20px;overflow-y:auto;overflow-x:hidden;touch-action:pan-y;-webkit-overflow-scrolling:touch;flex:1;min-height:0;overscroll-behavior:contain}
   .mfoot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 20px;border-top:1px solid var(--line);flex:none}
   .mfoot .left,.mfoot .right{display:flex;gap:8px}
   .mfoot .btn{min-height:40px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}
-  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:0 12px}
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px}
+  .grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0 12px}
   .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;min-width:0}
   .field label,.field .lbl{font-size:13px;font-weight:500;color:var(--ink2)}
   .field input,.field select,.field textarea{width:100%;min-width:0;border:1px solid var(--line2);border-radius:var(--r);padding:0 12px;height:40px;font-size:15px;background:var(--card);outline:none;
        transition:border-color .15s var(--ease)}
   .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
   .field textarea{height:auto;padding:8px 12px;resize:vertical;min-height:64px;line-height:1.45}
+  /* iOS: kolom tanggal punya lebar bawaan yang menembus kolom grid dan teksnya rata tengah; paksa ikut lebar kolom */
+  .field input[type=date]{-webkit-appearance:none;appearance:none;display:block;max-width:100%;text-align:left;line-height:38px}
+  .field input[type=date]::-webkit-date-and-time-value{text-align:left;min-height:1.2em}
+  .field select{text-overflow:ellipsis}
+  .modal,.mbody > *{max-width:100%}
   .field select{-webkit-appearance:none;appearance:none;padding-right:32px;
        background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23736a5e' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
        background-repeat:no-repeat;background-position:right 10px center;background-size:16px}
@@ -514,7 +522,7 @@
     .mfoot .right .btn.primary{flex:1}
     .mfoot .btn{min-height:44px}
     .mfoot .btn.icon{width:44px}
-    .grid4{grid-template-columns:1fr 1fr}
+    .grid4{grid-template-columns:repeat(2,minmax(0,1fr))}
     .mfull{grid-column:span 2}
     .cffoot{padding-bottom:calc(20px + env(safe-area-inset-bottom))}
     .cffoot .btn{flex:1;min-height:44px}
