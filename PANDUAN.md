@@ -66,13 +66,13 @@ Sekarang ada ikon app di HP, buka fullscreen tanpa address bar, dan tetap jalan 
 ## Langkah 3 — Nyalakan sinkron cloud di app
 
 1. Buka app (dari ikon HP atau linknya).
-2. Tap tombol **☁️ Cloud** di kanan atas.
+2. Tap chip status (**Lokal**) di kanan atas, atau buka **Lainnya → Sinkron cloud** (di laptop: tombol **Cloud**).
 3. Isi:
    - **Project URL** → dari Langkah 1 no.4
    - **Anon / Public Key** → dari Langkah 1 no.4
    - **Workspace** → kata sandi rahasia bebas, mis. `janice-2026-rahasia`
      (pakai **workspace yang sama persis** di setiap perangkat agar datanya nyambung)
-4. Tap **Simpan & Connect**. Titik status berubah **hijau + "Tersinkron ✓"**.
+4. Tap **Simpan dan sambungkan**. Chip status berubah **hijau, "Tersinkron"**.
 
 Ulangi Langkah 3 di perangkat lain (laptop/HP kedua) dengan **URL, Key, dan Workspace yang sama**
 → semua data langsung muncul & selalu update di kedua sisi.
@@ -81,11 +81,11 @@ Ulangi Langkah 3 di perangkat lain (laptop/HP kedua) dengan **URL, Key, dan Work
 
 ## 📖 Fitur Resep (catatan ala Notes iPhone)
 
-- Buka tab **Resep** di bawah. Tap **＋** (atau **✏️ Resep baru**) untuk menulis.
+- Buka tab **Resep** di bawah. Tap tombol **+** (atau **Resep baru**) untuk menulis.
 - **Baris pertama = judul.** Semua tersimpan otomatis saat mengetik, tidak ada tombol simpan.
-- **Checklist bahan:** awali baris dengan `- ` (atau tap **☑︎ Checklist**). Tekan Enter untuk item
+- **Checklist bahan:** awali baris dengan `- ` (atau tap **Checklist**). Tekan Enter untuk item
   berikutnya, Enter di item kosong untuk mengakhiri list. Setelah **Selesai**, tap lingkaran untuk centang.
-  Tombol **↺ Reset centang** mengosongkan semua centang (berguna sebelum belanja/masak lagi).
+  Tombol **Reset centang** mengosongkan semua centang (berguna sebelum belanja/masak lagi).
 - Tap teks resep untuk lanjut mengedit. Resep kosong otomatis dibuang. Hapus resep bisa di-**Urungkan**.
 - **Sinkron:** ikut sinkron cloud yang sama, **tidak perlu menjalankan SQL baru**.
 - **Backup Data** sekarang berisi collab + resep. File backup lama tetap bisa di-restore.
@@ -95,9 +95,9 @@ Ulangi Langkah 3 di perangkat lain (laptop/HP kedua) dengan **URL, Key, dan Work
 ## Cara kerja & catatan penting
 
 - **Offline-first:** app selalu bisa dibuka & diedit tanpa internet. Perubahan disimpan lokal,
-  lalu otomatis dikirim ke cloud saat online. Ada tombol **🔄 Sync** untuk memaksa sinkron.
+  lalu otomatis dikirim ke cloud saat online. Tap chip status di kanan atas (atau **Lainnya → Sync sekarang**) untuk memaksa sinkron.
 - **Anti bentrok:** kalau satu collab diedit di dua tempat, versi dengan waktu edit terbaru yang dipakai.
-- **Backup manual:** tombol **⬇ CSV** mengekspor semua data ke file (untuk arsip/Excel).
+- **Backup manual:** tombol **CSV** (di HP: **Lainnya → Export CSV**) mengekspor semua data ke file (untuk arsip/Excel).
 - **Keamanan:** jangan bagikan URL + Key + Workspace ke orang lain. Kalau ingin lebih aman,
   Supabase mendukung login email (Auth) — bisa diaktifkan nanti sebagai peningkatan.
 - **Batasan localStorage:** cache lokal bisa terhapus kalau storage HP penuh, tapi **data cloud
