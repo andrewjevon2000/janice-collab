@@ -79,6 +79,19 @@ Ulangi Langkah 3 di perangkat lain (laptop/HP kedua) dengan **URL, Key, dan Work
 
 ---
 
+## 📖 Fitur Resep (catatan ala Notes iPhone)
+
+- Buka tab **Resep** di bawah. Tap **＋** (atau **✏️ Resep baru**) untuk menulis.
+- **Baris pertama = judul.** Semua tersimpan otomatis saat mengetik, tidak ada tombol simpan.
+- **Checklist bahan:** awali baris dengan `- ` (atau tap **☑︎ Checklist**). Tekan Enter untuk item
+  berikutnya, Enter di item kosong untuk mengakhiri list. Setelah **Selesai**, tap lingkaran untuk centang.
+  Tombol **↺ Reset centang** mengosongkan semua centang (berguna sebelum belanja/masak lagi).
+- Tap teks resep untuk lanjut mengedit. Resep kosong otomatis dibuang. Hapus resep bisa di-**Urungkan**.
+- **Sinkron:** ikut sinkron cloud yang sama, **tidak perlu menjalankan SQL baru**.
+- **Backup Data** sekarang berisi collab + resep. File backup lama tetap bisa di-restore.
+
+---
+
 ## Cara kerja & catatan penting
 
 - **Offline-first:** app selalu bisa dibuka & diedit tanpa internet. Perubahan disimpan lokal,

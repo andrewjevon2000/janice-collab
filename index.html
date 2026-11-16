@@ -191,6 +191,50 @@
   .morelist button:first-child{border-top:none}
   .morelist button:active{background:var(--accent-soft)}
   .morelist .sub{display:block;font-size:12px;color:var(--muted);font-weight:400;margin-top:2px}
+  /* ===== Resep (notes ala iPhone) ===== */
+  #secResep{display:none}
+  .ntop{display:flex;gap:8px;margin-bottom:6px}
+  .ntop input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:16px;background:var(--card);color:var(--ink)}
+  .ngrp{font-size:13.5px;font-weight:700;margin:16px 4px 7px}
+  .nlist{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .nitem{padding:11px 14px;border-top:1px solid var(--line);cursor:pointer}
+  .nitem:first-child{border-top:none}
+  .nitem:active,.nitem:hover{background:#f7f6f4}
+  .nitem b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .nprev{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+  .nprev time{color:var(--ink);margin-right:8px}
+  .ncount{text-align:center;color:var(--muted);font-size:12px;margin-top:12px}
+  .ned{position:fixed;left:0;right:0;top:0;height:100%;z-index:55;background:var(--card);display:none;flex-direction:column}
+  .ned.open{display:flex}
+  .nedbar{display:flex;align-items:center;justify-content:space-between;gap:6px;border-bottom:1px solid var(--line);
+    padding:calc(6px + env(safe-area-inset-top)) max(10px, calc((100% - 780px)/2)) 6px}
+  .nedact{display:flex;align-items:center;gap:2px}
+  .nedlink{border:none;background:none;font:inherit;font-size:15.5px;font-weight:600;color:var(--orange);cursor:pointer;min-height:40px;padding:0 8px;border-radius:8px;display:inline-flex;align-items:center}
+  .nedlink:active{background:var(--accent-soft)}
+  .nedlink.strong{font-weight:700}
+  .ned .edit-on{display:none}
+  .ned.editing .edit-on{display:inline-flex}
+  .ned.editing .read-on{display:none}
+  .nedbody{flex:1;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;
+    padding:10px max(18px, calc((100% - 760px)/2)) calc(24px + env(safe-area-inset-bottom))}
+  .ned.editing .nedbody{overflow:hidden;padding-bottom:10px}
+  .neddate{text-align:center;font-size:12px;color:var(--muted);margin-bottom:10px;flex:none}
+  #n_text{display:none;flex:1;min-height:0;width:100%;border:none;outline:none;resize:none;font:inherit;font-size:16px;line-height:1.55;background:transparent;color:var(--ink)}
+  .ned.editing #n_text{display:block}
+  .ned.editing .nread{display:none}
+  .nread{font-size:16px;line-height:1.55;cursor:text;padding-bottom:40vh}
+  .nread h2{font-size:23px;font-weight:700;line-height:1.3;margin-bottom:8px;word-break:break-word}
+  .nread p{white-space:pre-wrap;word-break:break-word}
+  .nread a{color:var(--blue)}
+  .ngap{height:.8em}
+  .nempty{color:var(--muted)}
+  .ck{display:flex;gap:10px;align-items:flex-start;padding:4px 0;cursor:pointer;user-select:none;-webkit-user-select:none}
+  .ckbox{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid #b9b7b2;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff}
+  .ck.done .ckbox{background:var(--orange);border-color:var(--orange)}
+  .ck.done .ckbox::after{content:'✓'}
+  .ck.done .cktxt{color:var(--muted);text-decoration:line-through}
+  .cktxt{word-break:break-word}
+  .nreset{border:none;background:var(--orange-soft);color:var(--orange);font:inherit;font-size:12.5px;font-weight:700;border-radius:20px;padding:5px 12px;margin:0 0 10px;cursor:pointer;min-height:30px}
   @media(max-width:760px){
     .grid2,.grid4{grid-template-columns:1fr}
     .tablewrap{display:none}
@@ -209,6 +253,7 @@
     <div class="sub">Collab Scheduler — masak · draft · posting · payment</div>
   </div>
   <div class="hbtns">
+    <button class="btn ghost small" id="deskResBtn" onclick="toggleDeskResep()">📖 Resep</button>
     <button class="btn ghost small" onclick="openSettings()">☁️ Cloud</button>
     <button class="btn ghost small" onclick="exportCSV()">⬇ CSV</button>
     <button class="btn primary" onclick="openModal()">＋ Collab</button>
@@ -269,6 +314,15 @@
 </div>
 </section>
 
+<section id="secResep">
+  <div class="ntop">
+    <input type="search" id="nSearch" placeholder="🔍 Cari resep / bahan…" oninput="renderNotes()">
+    <button class="btn primary" onclick="newNote()">✏️ Resep baru</button>
+  </div>
+  <div id="nList"></div>
+  <div class="ncount" id="nCount"></div>
+</section>
+
 <section id="secMore">
   <div class="morelist">
     <button onclick="openSettings()">☁️ <span>Sinkron Cloud<span class="sub">Atur koneksi Supabase &amp; workspace</span></span></button>
@@ -284,8 +338,9 @@
 <nav class="bottomnav" id="bottomnav">
   <button id="nav-home" onclick="setTab('home')">🏠<span>Home</span></button>
   <button id="nav-collabs" onclick="setTab('collabs')">📋<span>Collabs</span></button>
-  <button class="navfab" onclick="openModal()" aria-label="Tambah collab"><i>＋</i></button>
+  <button class="navfab" id="navFab" onclick="fabAction()" aria-label="Tambah collab"><i>＋</i></button>
   <button id="nav-jadwal" onclick="setTab('jadwal')">📅<span>Jadwal</span></button>
+  <button id="nav-resep" onclick="setTab('resep')">📖<span>Resep</span></button>
   <button id="nav-more" onclick="setTab('more')">⚙️<span>Lainnya</span></button>
 </nav>
 
@@ -366,6 +421,24 @@
         <button class="btn primary" onclick="connectCloud()">Simpan &amp; Connect</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Resep editor (ala Notes) -->
+<div class="ned" id="nEd" role="dialog" aria-label="Editor resep">
+  <div class="nedbar">
+    <button class="nedlink" onclick="closeNote()">‹ Resep</button>
+    <div class="nedact">
+      <button class="nedlink edit-on" onmousedown="event.preventDefault()" onclick="toggleCkLine()" title="Jadikan baris ini checklist">☑︎ Checklist</button>
+      <button class="nedlink read-on" onclick="setNoteMode(true)">Edit</button>
+      <button class="nedlink" onclick="deleteNote()" aria-label="Hapus resep" style="color:var(--red)">🗑</button>
+      <button class="nedlink edit-on strong" onclick="doneNote()">Selesai</button>
+    </div>
+  </div>
+  <div class="nedbody" id="nBody">
+    <div class="neddate" id="nDate"></div>
+    <div class="nread" id="nRead"></div>
+    <textarea id="n_text" oninput="onNoteInput()" placeholder="Judul resep&#10;&#10;Bahan:&#10;- 2 siung bawang putih&#10;- 1 sdm kecap manis&#10;&#10;Cara membuat:&#10;1. …"></textarea>
   </div>
 </div>
 
@@ -567,21 +640,24 @@ function render(){
     </div>`;
   }).join('');
   renderCal();
+  renderNotes();
 }
 
 /* ================= calendar ================= */
-let view='table', calDate=new Date(), mobTab='home';
+let view='table', calDate=new Date(), mobTab='home', deskPage='main';
 function isMobile(){ return window.matchMedia('(max-width:760px)').matches; }
 function applyVisibility(){
-  const S={home:$('secHome'),collabs:$('secCollabs'),jadwal:$('secJadwal'),more:$('secMore')};
+  const S={home:$('secHome'),collabs:$('secCollabs'),jadwal:$('secJadwal'),resep:$('secResep'),more:$('secMore')};
   if(isMobile()){
     for(const k in S) S[k].style.display=(k===mobTab)?'block':'none';
     $('tableView').style.display='none';
     $('cardsView').style.display=(mobTab==='collabs')?'flex':'none';
     $('calView').style.display=(mobTab==='jadwal')?'block':'none';
+  } else if(deskPage==='resep'){
+    for(const k in S) S[k].style.display=(k==='resep')?'block':'none';
   } else {
     S.home.style.display='block'; S.collabs.style.display='block'; S.more.style.display='none';
-    S.jadwal.style.display='block';
+    S.jadwal.style.display='block'; S.resep.style.display='none';
     $('tableView').style.display=(view==='table')?'block':'none';
     $('cardsView').style.display='none';
     $('calView').style.display=(view==='cal')?'block':'none';
@@ -596,9 +672,19 @@ function setView(v){
 }
 function setTab(t){
   mobTab=t;
-  ['home','collabs','jadwal','more'].forEach(k=>{ const b=$('nav-'+k); if(b) b.classList.toggle('active',k===t); });
+  ['home','collabs','jadwal','resep','more'].forEach(k=>{ const b=$('nav-'+k); if(b) b.classList.toggle('active',k===t); });
   applyVisibility();
   if(t==='jadwal') renderCal();
+  if(t==='resep') renderNotes();
+  $('navFab').setAttribute('aria-label', t==='resep'?'Tulis resep baru':'Tambah collab');
+  window.scrollTo({top:0});
+}
+/* FAB tengah: di tab Resep membuat resep baru, selain itu tambah collab */
+function fabAction(){ if(isMobile() && mobTab==='resep') newNote(); else openModal(); }
+function toggleDeskResep(){
+  deskPage = deskPage==='resep' ? 'main' : 'resep';
+  $('deskResBtn').textContent = deskPage==='resep' ? '📋 Collab' : '📖 Resep';
+  applyVisibility(); if(deskPage==='resep') renderNotes();
   window.scrollTo({top:0});
 }
 function weekStart(d){ const x=new Date(d); const off=(x.getDay()+6)%7; x.setDate(x.getDate()-off); x.setHours(0,0,0,0); return x; }
@@ -828,8 +914,177 @@ function exportCSV(){
   const lines=[head.map(q).join(',')].concat(activeRows().map(r=>[r.tanggal,r.brand,r.jenis,r.produk,r.ksp,r.menu,(r.deliv||[]).join('; '),r.masak,r.draft,r.approval,r.posting,r.status,r.fee,r.bayar,r.lbrief,r.briefPdfName,r.lpost,r.catatan].map(q).join(',')));
   download('madeby-janice-collabs.csv','﻿'+lines.join('\n'),'text/csv;charset=utf-8');
 }
-function exportJSON(){ download('madeby-janice-backup.json', JSON.stringify(rows,null,2), 'application/json'); }
-function importJSON(ev){ const f=ev.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=e=>{ try{ const d=JSON.parse(e.target.result); if(!Array.isArray(d)) throw 0; rows=d; persist(); render(); alert('Restore berhasil ('+d.length+' baris).'); }catch(x){ alert('File tidak valid.'); } }; rd.readAsText(f); ev.target.value=''; }
+function exportJSON(){ download('madeby-janice-backup.json', JSON.stringify({version:2, collabs:rows, resep:notes.filter(n=>!n._new)},null,2), 'application/json'); }
+/* Restore menerima format lama (array collab saja) maupun format baru {collabs, resep} */
+function importJSON(ev){ const f=ev.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=e=>{ try{
+    const d=JSON.parse(e.target.result);
+    if(Array.isArray(d)){ rows=d.map(migrateRow); persist(); render(); alert('Restore berhasil ('+d.length+' collab).'); return; }
+    if(!d || !Array.isArray(d.collabs)) throw 0;
+    rows=d.collabs.map(migrateRow); persist();
+    if(Array.isArray(d.resep)){ notes=d.resep; persistNotes(); }
+    render(); alert('Restore berhasil ('+rows.length+' collab, '+(Array.isArray(d.resep)?d.resep.length:0)+' resep).');
+  }catch(x){ alert('File tidak valid.'); } }; rd.readAsText(f); ev.target.value=''; }
+
+/* ================= RESEP (notes ala iPhone) =================
+   - Baris pertama yang berisi teks = judul, sisanya isi.
+   - Baris diawali "- " (atau "• " / "* ") = checklist; "✓ " = sudah dicentang.
+   - Autosave lokal saat mengetik, push ke cloud setelah jeda.
+   - Cloud: tabel `collabs` yang sama, workspace "<workspace>::resep",
+     jadi tidak perlu SQL baru & versi app lama tidak ikut menarik resep. */
+const NKEY='janice_resep_v1';
+const CK_RE=/^(\s*)([-•*]|✓)\s+(.*)$/;
+function loadNotes(){ try{ const r=localStorage.getItem(NKEY); if(r) return JSON.parse(r); }catch(e){} return []; }
+function persistNotes(){ try{ localStorage.setItem(NKEY, JSON.stringify(notes.filter(n=>!n._new))); }catch(e){} }
+let notes=loadNotes(), curNote=null, noteEditing=false, noteSaveT=null, notePushT=null;
+function activeNotes(){ return notes.filter(n=>!n._deleted && !n._new); }
+function stripCk(s){ const m=String(s).match(CK_RE); return m?m[3]:String(s); }
+function noteParts(t){ const L=String(t||'').split('\n'); return {L, ti:L.findIndex(x=>stripCk(x).trim())}; }
+function noteTitle(t){ const {L,ti}=noteParts(t); return ti<0?'Resep baru':stripCk(L[ti]).trim(); }
+function notePreview(t){ const {L,ti}=noteParts(t); if(ti<0) return ''; const nx=L.slice(ti+1).find(x=>stripCk(x).trim()); return nx?stripCk(nx).trim():''; }
+function dayDiff(iso){ const d=new Date(iso), t=new Date(); return Math.round((new Date(t.getFullYear(),t.getMonth(),t.getDate())-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/86400000); }
+function nGroup(iso){
+  const n=dayDiff(iso), d=new Date(iso);
+  if(n<=0) return 'Hari ini'; if(n===1) return 'Kemarin'; if(n<7) return '7 Hari Terakhir'; if(n<30) return '30 Hari Terakhir';
+  return MONTHS_ID[d.getMonth()]+(d.getFullYear()!==new Date().getFullYear()?' '+d.getFullYear():'');
+}
+function hhmm(d){ return String(d.getHours()).padStart(2,'0')+'.'+String(d.getMinutes()).padStart(2,'0'); }
+function nTime(iso){
+  const d=new Date(iso), n=dayDiff(iso);
+  if(n<=0) return hhmm(d); if(n===1) return 'Kemarin';
+  if(n<7) return ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()];
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+String(d.getFullYear()).slice(2);
+}
+function fmtStamp(iso){ const d=new Date(iso); return d.getDate()+' '+MONTHS_ID[d.getMonth()]+' '+d.getFullYear()+' pukul '+hhmm(d); }
+function linkify(h){ return h.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>'); }
+
+function renderNotes(){
+  const box=$('nList'); if(!box) return;
+  const q=($('nSearch').value||'').toLowerCase().trim();
+  const all=activeNotes().sort((a,b)=>a.updated_at<b.updated_at?1:a.updated_at>b.updated_at?-1:0);
+  const list=q?all.filter(n=>(n.text||'').toLowerCase().includes(q)):all;
+  $('nCount').textContent=all.length?(q?list.length+' dari ':'')+all.length+' resep':'';
+  if(!list.length){ box.innerHTML=`<div class="empty">${q?'Tidak ada resep yang cocok.':'Belum ada resep. Tap <b>✏️ Resep baru</b> untuk mulai menulis.'}</div>`; return; }
+  let html='', g='';
+  list.forEach(n=>{
+    const gg=nGroup(n.updated_at);
+    if(gg!==g){ if(g) html+='</div>'; html+=`<div class="ngrp">${gg}</div><div class="nlist">`; g=gg; }
+    html+=`<div class="nitem" onclick="openNote('${esc(n.id)}')"><b>${esc(noteTitle(n.text))}</b><div class="nprev"><time>${nTime(n.updated_at)}</time>${esc(notePreview(n.text)||'Tidak ada teks tambahan')}</div></div>`;
+  });
+  box.innerHTML=html+'</div>';
+}
+function newNote(){
+  const n={id:'n'+Date.now().toString(36)+Math.random().toString(36).slice(2,7), text:'', created_at:nowStamp(), updated_at:nowStamp(), _dirty:false, _deleted:false, _new:true};
+  notes.push(n); openNote(n.id,true);
+}
+function openNote(id,edit){
+  const n=notes.find(x=>x.id===id); if(!n) return;
+  curNote=n; $('n_text').value=n.text||'';
+  $('nEd').classList.add('open'); document.body.style.overflow='hidden'; fitNed();
+  setNoteMode(!!edit);
+}
+function lineEndOffset(text,i){ const L=text.split('\n'); let o=0; for(let k=0;k<=i&&k<L.length;k++) o+=L[k].length+(k<i?1:0); return o; }
+function setNoteMode(edit,caretLine){
+  if(!curNote) return;
+  noteEditing=edit; $('nEd').classList.toggle('editing',edit);
+  $('nDate').textContent=fmtStamp(curNote.updated_at);
+  if(edit){
+    const ta=$('n_text'); ta.focus();
+    const p=(caretLine!=null)?lineEndOffset(ta.value,caretLine):ta.value.length;
+    try{ ta.setSelectionRange(p,p); }catch(e){}
+  } else { $('n_text').blur(); renderReader(); $('nBody').scrollTop=0; }
+}
+function renderReader(){
+  const t=curNote?curNote.text||'':'', {L,ti}=noteParts(t);
+  if(ti<0){ $('nRead').innerHTML='<p class="nempty">Tap untuk menulis…</p>'; return; }
+  let h=`<h2 data-i="${ti}">${linkify(esc(stripCk(L[ti]).trim()))}</h2>`;
+  const done=L.filter(s=>{const m=s.match(CK_RE); return m&&m[2]==='✓';}).length;
+  if(done) h+=`<button type="button" class="nreset">↺ Reset centang (${done})</button>`;
+  for(let i=ti+1;i<L.length;i++){
+    const s=L[i], m=s.match(CK_RE);
+    if(m) h+=`<div class="ck${m[2]==='✓'?' done':''}" data-i="${i}" style="margin-left:${Math.min(m[1].length,8)*6}px"><span class="ckbox"></span><span class="cktxt">${linkify(esc(m[3]))||'&nbsp;'}</span></div>`;
+    else if(!s.trim()) h+='<div class="ngap"></div>';
+    else h+=`<p data-i="${i}">${linkify(esc(s))}</p>`;
+  }
+  $('nRead').innerHTML=h;
+}
+function onNoteInput(){ clearTimeout(noteSaveT); noteSaveT=setTimeout(saveNote,350); }
+function saveNote(){
+  clearTimeout(noteSaveT);
+  const n=curNote; if(!n) return;
+  const t=$('n_text').value; if(t===n.text) return;
+  n.text=t; n.updated_at=nowStamp();
+  if(t.trim()) n._new=false;
+  n._dirty=!n._new;
+  persistNotes(); $('nDate').textContent=fmtStamp(n.updated_at); renderNotes();
+  clearTimeout(notePushT); notePushT=setTimeout(pushNotesDirty,1500);
+}
+function hideNed(){
+  curNote=null; noteEditing=false;
+  $('n_text').blur(); $('nEd').classList.remove('open','editing');
+  $('nEd').style.height=''; $('nEd').style.top='';
+  document.body.style.overflow='';
+}
+function closeNote(){
+  if(!curNote) return;
+  saveNote();
+  const n=curNote;
+  if(!(n.text||'').trim()){ // resep kosong otomatis dibuang, seperti Notes
+    if(n._new) notes=notes.filter(x=>x!==n);
+    else { n._deleted=true; n._dirty=true; n.updated_at=nowStamp(); }
+    persistNotes();
+  }
+  hideNed(); renderNotes(); pushNotesDirty();
+}
+function doneNote(){ saveNote(); if(!(curNote.text||'').trim()){ closeNote(); return; } setNoteMode(false); }
+function deleteNote(){
+  const n=curNote; if(!n) return;
+  saveNote();
+  if(!(n.text||'').trim()){ closeNote(); return; }
+  n._deleted=true; n._dirty=true; n.updated_at=nowStamp();
+  persistNotes(); hideNed(); renderNotes(); pushNotesDirty();
+  toast('Resep "'+noteTitle(n.text)+'" dihapus', 6000, 'Urungkan', ()=>{
+    n._deleted=false; n._dirty=true; n.updated_at=nowStamp(); persistNotes(); renderNotes(); pushNotesDirty(); toast('Dikembalikan ✓');
+  });
+}
+function setNoteLines(L){ $('n_text').value=L.join('\n'); saveNote(); renderReader(); }
+function toggleCheck(i){
+  const L=$('n_text').value.split('\n'), m=L[i]&&L[i].match(CK_RE); if(!m) return;
+  L[i]=m[1]+(m[2]==='✓'?'- ':'✓ ')+m[3]; setNoteLines(L);
+}
+function resetChecks(){
+  setNoteLines($('n_text').value.split('\n').map(s=>{ const m=s.match(CK_RE); return (m&&m[2]==='✓')?m[1]+'- '+m[3]:s; }));
+}
+function curLineRange(ta){ const v=ta.value, p=ta.selectionStart, s=v.lastIndexOf('\n',p-1)+1, e0=v.indexOf('\n',p); return {s, e:e0<0?v.length:e0}; }
+/* Tombol ☑︎ Checklist: jadikan / batalkan baris aktif sebagai checklist */
+function toggleCkLine(){
+  const ta=$('n_text'), {s,e}=curLineRange(ta), line=ta.value.slice(s,e), m=line.match(CK_RE);
+  ta.focus();
+  ta.setRangeText(m ? m[1]+m[3] : '- '+line, s, e, 'end');
+  onNoteInput();
+}
+/* Enter di baris checklist otomatis lanjut "- "; Enter di item kosong mengakhiri list */
+function onNoteKey(ev){
+  if(ev.key!=='Enter' || ev.shiftKey || ev.isComposing || ev.keyCode===229) return;
+  const ta=ev.target; if(ta.selectionStart!==ta.selectionEnd) return;
+  const {s,e}=curLineRange(ta), m=ta.value.slice(s,e).match(CK_RE); if(!m) return;
+  ev.preventDefault();
+  if(!m[3].trim()) ta.setRangeText(m[1], s, e, 'end');
+  else ta.setRangeText('\n'+m[1]+'- ', ta.selectionStart, ta.selectionStart, 'end');
+  onNoteInput();
+}
+function onReaderClick(ev){
+  if(ev.target.closest('a')) return;
+  if(ev.target.closest('.nreset')){ resetChecks(); return; }
+  const ck=ev.target.closest('.ck'); if(ck){ toggleCheck(+ck.dataset.i); return; }
+  const ln=ev.target.closest('[data-i]');
+  setNoteMode(true, ln?+ln.dataset.i:null);
+}
+/* iOS: sesuaikan tinggi editor dengan area di atas keyboard */
+function fitNed(){
+  const vv=window.visualViewport, ed=$('nEd');
+  if(!vv || !ed.classList.contains('open')) return;
+  ed.style.height=vv.height+'px'; ed.style.top=vv.offsetTop+'px';
+}
 
 /* ================= CLOUD SYNC (Supabase) ================= */
 let sb=null, cfg=loadCfg(), syncing=false, lastSync=0;
@@ -865,6 +1120,48 @@ async function pushDirty(){
 }
 function stripMeta(r){ const o=Object.assign({},r); delete o._dirty; delete o._deleted; delete o.updated_at; delete o.id; return o; }
 
+/* ---- sinkron resep ---- */
+function notesWs(){ return cfg.ws+'::resep'; }
+function notePayload(n){ return { id:n.id, workspace:notesWs(), data:{text:n.text||'', created_at:n.created_at||n.updated_at}, updated_at:n.updated_at, deleted:!!n._deleted }; }
+async function pushNotesDirty(){
+  if(!sb) return;
+  const dirty=notes.filter(n=>n._dirty && !n._new);
+  if(!dirty.length) return;
+  const sent={}; dirty.forEach(n=>sent[n.id]=n.updated_at);
+  try{
+    const {error}=await sb.from('collabs').upsert(dirty.map(notePayload),{onConflict:'id'});
+    if(error) throw error;
+    dirty.forEach(n=>{ if(n.updated_at===sent[n.id]) n._dirty=false; }); // jangan tandai bersih kalau diedit lagi saat upload
+    persistNotes();
+    setSync('on','Tersinkron ✓ '+new Date().toLocaleTimeString('id-ID'));
+  }catch(e){ setSync('off','Gagal push resep (akan dicoba lagi): '+(e.message||e)); }
+}
+async function syncNotes(){
+  const {data,error}=await sb.from('collabs').select('*').eq('workspace',notesWs());
+  if(error) throw error;
+  const rem={}; (data||[]).forEach(r=>rem[r.id]=r);
+  const toPush=notes.filter(n=>!n._new && (!rem[n.id] || new Date(n.updated_at)>new Date(rem[n.id].updated_at)));
+  if(toPush.length){
+    const sent={}; toPush.forEach(n=>sent[n.id]=n.updated_at);
+    const {error:perr}=await sb.from('collabs').upsert(toPush.map(notePayload),{onConflict:'id'});
+    if(perr) throw perr;
+    toPush.forEach(n=>{ if(n.updated_at===sent[n.id]) n._dirty=false; });
+  }
+  const loc={}; notes.forEach(n=>loc[n.id]=n);
+  (data||[]).forEach(r=>{
+    const l=loc[r.id];
+    if(l && !(new Date(r.updated_at)>new Date(l.updated_at))) return;
+    if(l && l===curNote && noteEditing) return; // jangan timpa resep yang sedang diketik
+    const m={id:r.id, text:(r.data&&r.data.text)||'', created_at:(r.data&&r.data.created_at)||r.updated_at, updated_at:r.updated_at, _deleted:!!r.deleted, _dirty:false};
+    if(l) Object.assign(l,m); else notes.push(m);
+  });
+  persistNotes();
+  if(curNote && !noteEditing){
+    if(curNote._deleted){ hideNed(); }
+    else { $('n_text').value=curNote.text||''; renderReader(); }
+  }
+}
+
 async function syncNow(silent){
   if(!sb){ if(!silent) openSettings(); return; }
   if(syncing) return;
@@ -891,6 +1188,7 @@ async function syncNow(silent){
         if(loc){ Object.assign(loc,merged); } else { rows.push(merged); localById[rem.id]=merged; }
       }
     });
+    await syncNotes();
     persist(); render();
     lastSync=Date.now();
     setSync('on','Tersinkron ✓ '+new Date().toLocaleTimeString('id-ID'));
@@ -913,7 +1211,14 @@ setView('table');
 setTab('home');
 render();
 initCloud();
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeModal(); closeSettings(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if(curNote){ closeNote(); return; } closeModal(); closeSettings(); } });
+$('n_text').addEventListener('keydown',onNoteKey);
+$('nRead').addEventListener('click',onReaderClick);
+if(window.visualViewport){ visualViewport.addEventListener('resize',fitNed); visualViewport.addEventListener('scroll',fitNed); }
+// simpan resep saat app ditutup / pindah app
+const flushNote=()=>{ if(curNote){ saveNote(); pushNotesDirty(); } };
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') flushNote(); });
+window.addEventListener('pagehide',flushNote);
 $('m_brand').addEventListener('input',()=>{ $('e_brand').hidden=true; });
 ['m_brand','m_produk','m_ksp','m_menu','m_masak','m_draft','m_approval','m_posting'].forEach(id=>$(id).addEventListener('input',updateDots));
 window.matchMedia('(max-width:760px)').addEventListener('change',()=>{ applyVisibility(); });
