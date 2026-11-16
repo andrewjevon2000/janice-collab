@@ -65,6 +65,14 @@
   .fstat .feeval.warn{color:var(--red)}
   .fstat .fsub{font-size:11.5px;color:var(--muted);margin-top:2px}
   .feehid{letter-spacing:.12em}
+  /* drill-down dari card dashboard */
+  .stat.tap,.fstat.tap{cursor:pointer;transition:.12s;-webkit-tap-highlight-color:transparent}
+  .stat.tap:hover{border-color:#cfccc6}
+  .stat.tap:active,.fstat.tap:active{transform:scale(.98);opacity:.8}
+  .stat.tap .label::after,.fstat.tap .label::after{content:' ›';color:var(--muted);font-weight:700}
+  .qfbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--ink);color:#fff;border-radius:var(--radius);padding:9px 10px 9px 14px;margin-bottom:12px;font-size:13.5px}
+  .qfbar[hidden]{display:none}
+  .qfbar .qfclear{border:none;background:rgba(255,255,255,.16);color:#fff;font:inherit;font-size:12.5px;font-weight:700;border-radius:8px;padding:7px 10px;cursor:pointer;white-space:nowrap;min-height:34px}
   /* quick add */
   .quickadd{display:flex;gap:8px;margin-bottom:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:9px}
   .quickadd input{flex:1;border:none;outline:none;font-size:14px;background:transparent;color:var(--ink);min-width:0}
@@ -305,6 +313,7 @@
 </section>
 
 <section id="secCollabs">
+<div class="qfbar" id="qfBar" hidden role="status"><span id="qfText"></span><button type="button" class="qfclear" onclick="clearQuick()">✕ Semua collab</button></div>
 <div class="toolbar">
   <input type="search" id="fSearch" placeholder="🔍 Cari brand / menu…" oninput="render()">
   <select id="fBrand" onchange="render()"><option value="">Semua Brand</option></select>
@@ -550,21 +559,43 @@ function flags(r){
 }
 
 /* ================= dashboard ================= */
+/* Definisi tiap angka di dashboard. Dipakai untuk menghitung angka DAN untuk
+   filter saat card ditap, jadi jumlah di card selalu sama dengan isi list. */
+const curYM=()=>todayISO().slice(0,7), curY=()=>todayISO().slice(0,4), whenOf=r=>r.posting||r.tanggal||'';
+const QF={
+  month:     {label:()=>'Collab bulan '+MONTHS_ID[new Date().getMonth()], fn:r=>whenOf(r).slice(0,7)===curYM()},
+  draft:     {label:()=>'Draft belum dikirim',  fn:r=>statusIdx(r.status)>=0 && statusIdx(r.status)<statusIdx('Draft Sent')},
+  notPosted: {label:()=>'Belum posting',        fn:r=>statusIdx(r.status)<statusIdx('Posted')},
+  late:      {label:()=>'Deadline terlewat',    fn:r=>{const f=flags(r);return f.draft==='late'||f.posting==='late';}},
+  unpaid:    {label:()=>'Belum dibayar',        fn:r=>r.fee>0 && r.bayar!=='Lunas'},
+  paidMonth: {label:()=>'Lunas bulan '+MONTHS_ID[new Date().getMonth()], fn:r=>r.fee>0 && r.bayar==='Lunas' && whenOf(r).slice(0,7)===curYM()},
+  paidYear:  {label:()=>'Lunas tahun '+curY(),  fn:r=>r.fee>0 && r.bayar==='Lunas' && whenOf(r).slice(0,4)===curY()}
+};
+let quickFilter=null;
+function qfRows(k,A){ return (A||activeRows()).filter(QF[k].fn); }
+function statCard(k,label,cls){
+  const n=qfRows(k).length;
+  return `<div class="stat tap" role="button" tabindex="0" onclick="drill('${k}')" onkeydown="if(event.key==='Enter')drill('${k}')" aria-label="${esc(label)}: ${n}, lihat daftar"><div class="label">${label}</div><div class="value ${cls&&n?cls:''}">${n}</div></div>`;
+}
 function renderDash(){
-  const now=new Date(), ym=toISO(now).slice(0,7), A=activeRows();
-  const thisMonth=A.filter(r=>(r.posting||r.tanggal||'').slice(0,7)===ym);
-  const draftPending=A.filter(r=>statusIdx(r.status)>=0 && statusIdx(r.status)<statusIdx('Draft Sent')).length;
-  const notPosted=A.filter(r=>statusIdx(r.status)<statusIdx('Posted')).length;
-  const unpaid=A.filter(r=>r.fee>0 && r.bayar!=='Lunas').length;
-  const late=A.filter(r=>{const f=flags(r);return f.draft==='late'||f.posting==='late';}).length;
-  $('dash').innerHTML=`
-    <div class="stat"><div class="label">Collab bulan ini (${MONTHS_ID[now.getMonth()]})</div><div class="value">${thisMonth.length}</div></div>
-    <div class="stat"><div class="label">Draft belum dikirim</div><div class="value ${draftPending?'warn':''}">${draftPending}</div></div>
-    <div class="stat"><div class="label">Belum posting</div><div class="value">${notPosted}</div></div>
-    <div class="stat"><div class="label">Deadline terlewat ⚠️</div><div class="value ${late?'warn':''}">${late}</div></div>
-    <div class="stat"><div class="label">Invoice belum lunas</div><div class="value ${unpaid?'warn':''}">${unpaid}</div></div>`;
+  const now=new Date(), A=activeRows();
+  $('dash').innerHTML=
+    statCard('month','Collab bulan ini ('+MONTHS_ID[now.getMonth()]+')')+
+    statCard('draft','Draft belum dikirim','warn')+
+    statCard('notPosted','Belum posting')+
+    statCard('late','Deadline terlewat ⚠️','warn')+
+    statCard('unpaid','Invoice belum lunas','warn');
   renderFeeDash(A, now);
 }
+/* Tap card: buka list Collabs yang sudah difilter sesuai card */
+function drill(k){
+  if(!QF[k]) return;
+  quickFilter=k;
+  ['fSearch','fBrand','fStatus','fMonth'].forEach(id=>{ $(id).value=''; }); // supaya jumlah = angka di card
+  if(isMobile()){ setTab('collabs',true); render(); }
+  else { setView('table'); render(); $('secCollabs').scrollIntoView({behavior:'smooth',block:'start'}); }
+}
+function clearQuick(){ quickFilter=null; render(); }
 
 /* ================= fee card ================= */
 // Nominal disembunyikan setiap app dibuka / kembali dari background; tap ikon mata untuk menampilkan.
@@ -575,18 +606,16 @@ function money(n,always){ if(!feeShown) return (n||always)?'<span class="feehid"
 function toggleFee(){ feeShown=!feeShown; render(); }
 function renderFeeDash(A, now){
   const box=$('feeDash'); if(!box) return;
-  const ym=toISO(now).slice(0,7), yr=ym.slice(0,4), when=r=>r.posting||r.tanggal||'';
-  const paid=A.filter(r=>r.fee>0 && r.bayar==='Lunas');
+  const yr=curY();
   const sum=list=>list.reduce((s,r)=>s+(Number(r.fee)||0),0);
-  const mon=paid.filter(r=>when(r).slice(0,7)===ym), yearL=paid.filter(r=>when(r).slice(0,4)===yr);
-  const open=A.filter(r=>r.fee>0 && r.bayar!=='Lunas');
-  const st=(label,val,cls,sub)=>`<div class="fstat"><div><div class="label">${label}</div><div class="fsub">${sub}</div></div><div class="feeval ${cls}">${money(val,true)}</div></div>`;
+  const mon=qfRows('paidMonth',A), yearL=qfRows('paidYear',A), open=qfRows('unpaid',A);
+  const st=(label,val,cls,sub,k)=>`<div class="fstat tap" role="button" tabindex="0" onclick="drill('${k}')" onkeydown="if(event.key==='Enter')drill('${k}')"><div><div class="label">${label}</div><div class="fsub">${sub}</div></div><div class="feeval ${cls}">${money(val,true)}</div></div>`;
   box.innerHTML=`<div class="feehead"><b>💰 Fee</b>
       <button type="button" class="eyebtn" onclick="toggleFee()" aria-pressed="${feeShown}" aria-label="${feeShown?'Sembunyikan nominal':'Tampilkan nominal'}" title="${feeShown?'Sembunyikan nominal':'Tampilkan nominal'}">${feeShown?EYE_OFF:EYE_OPEN}</button></div>
     <div class="feegrid">
-      ${st('Pendapatan '+MONTHS_ID[now.getMonth()], sum(mon), 'money', 'Lunas · '+mon.length+' collab')}
-      ${st('Pendapatan '+yr, sum(yearL), 'money', 'Lunas · '+yearL.length+' collab')}
-      ${st('Belum dibayar', sum(open), open.length?'warn':'', open.length+' collab')}
+      ${st('Pendapatan '+MONTHS_ID[now.getMonth()], sum(mon), 'money', 'Lunas · '+mon.length+' collab', 'paidMonth')}
+      ${st('Pendapatan '+yr, sum(yearL), 'money', 'Lunas · '+yearL.length+' collab', 'paidYear')}
+      ${st('Belum dibayar', sum(open), open.length?'warn':'', open.length+' collab', 'unpaid')}
     </div>`;
 }
 
@@ -604,9 +633,11 @@ function renderFilters(){
   $('fMonth').innerHTML='<option value="">Semua Bulan</option>'+months.map(m=>{const[y,mo]=m.split('-');return `<option value="${m}">${MONTHS_ID[+mo-1]} ${y}</option>`;}).join(''); keep($('fMonth'),cur);
   $('brandList').innerHTML=brands.map(b=>`<option>${esc(b)}</option>`).join('');
 }
-function filteredRows(){
+function filteredRows(useQuick){
   const q=$('fSearch').value.toLowerCase().trim(), fb=$('fBrand').value, fs=$('fStatus').value, fm=$('fMonth').value;
+  const qf=(useQuick && quickFilter && QF[quickFilter]) ? QF[quickFilter].fn : null;
   return activeRows().filter(r=>{
+    if(qf && !qf(r)) return false;
     if(fb&&r.brand!==fb) return false;
     if(fs&&r.status!==fs) return false;
     if(fm&&!((r.tanggal||'').startsWith(fm)||(r.posting||'').startsWith(fm))) return false;
@@ -645,8 +676,12 @@ function renderNextUp(){
 }
 function render(){
   renderDash(); renderFilters(); renderNextUp();
-  const data=filteredRows();
+  const data=filteredRows(true);
   $('emptyMsg').style.display=data.length?'none':'block';
+  const anyFilter=quickFilter||$('fSearch').value||$('fBrand').value||$('fStatus').value||$('fMonth').value;
+  $('emptyMsg').innerHTML=anyFilter?'Tidak ada collab untuk filter ini 🎉':'Belum ada collab. Tap <b>＋ Collab</b> atau pakai Quick Add.';
+  $('qfBar').hidden=!quickFilter;
+  if(quickFilter) $('qfText').innerHTML=`Filter: <b>${esc(QF[quickFilter].label())}</b> · ${data.length} collab`;
   // table
   $('tbody').innerHTML=data.map(r=>{
     const f=flags(r), dD=daysUntil(r.draft), dP=daysUntil(r.posting);
@@ -718,7 +753,8 @@ function setView(v){
   applyVisibility();
   if(v==='cal') renderCal();
 }
-function setTab(t){
+function setTab(t,keepQuick){
+  if(!keepQuick && quickFilter){ quickFilter=null; render(); }
   mobTab=t;
   ['home','collabs','jadwal','resep','more'].forEach(k=>{ const b=$('nav-'+k); if(b) b.classList.toggle('active',k===t); });
   applyVisibility();
