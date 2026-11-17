@@ -4,7 +4,7 @@
    - Aset lain (ikon, manifest): cache-first.
    - Install selalu ambil file segar dari server (cache:'reload'), supaya cache versi baru
      tidak terisi file lama dari HTTP cache browser. */
-const CACHE = 'janice-collab-v12';
+const CACHE = 'janice-collab-v13';
 const ASSETS = ['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install', e => {
   self.skipWaiting();
