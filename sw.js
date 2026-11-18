@@ -4,7 +4,7 @@
    - Aset lain (ikon, manifest): cache-first.
    - Install selalu ambil file segar dari server (cache:'reload'), supaya cache versi baru
      tidak terisi file lama dari HTTP cache browser. */
-const CACHE = 'janice-collab-v15';
+const CACHE = 'janice-collab-v16';
 // Foto resep (Supabase Storage) disimpan di cache terpisah supaya tetap tampil saat offline
 // dan tidak ikut terhapus saat versi app naik.
 const FOTO_CACHE = 'janice-foto';

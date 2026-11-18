@@ -148,8 +148,8 @@ create policy "resep foto upload" on storage.objects
 ```
 
 Cara pakai: buka resep → **Edit** → taruh kursor di tempat foto → tap **Foto** → pilih dari galeri.
-Tap foto saat membaca resep untuk melihatnya lebih besar. Menghapus foto: saat **Edit**, hapus baris
-`![foto](https://...)`-nya.
+Tap foto saat membaca resep untuk melihatnya lebih besar. Saat **Edit**, foto tampil sebagai baris `[Foto 1]`, `[Foto 2]`, dst.; menghapus baris itu = membuang
+fotonya dari resep.
 
 > Catatan: foto bisa dibuka siapa pun yang punya alamat lengkapnya. Alamatnya panjang dan acak,
 > jadi praktis tidak bisa ditebak. Foto yang barisnya dihapus dari resep tetap tersimpan di Storage

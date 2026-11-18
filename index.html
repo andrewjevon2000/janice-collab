@@ -1549,7 +1549,7 @@ function newNote(){
 }
 function openNote(id,edit){
   const n=notes.find(x=>x.id===id); if(!n) return;
-  curNote=n; $('n_text').value=n.text||'';
+  curNote=n; $('n_text').value=toEditText(n.text||'');
   $('nEd').classList.add('open'); document.body.style.overflow='hidden'; fitNed();
   setNoteMode(!!edit);
 }
@@ -1583,7 +1583,7 @@ function onNoteInput(){ clearTimeout(noteSaveT); noteSaveT=setTimeout(saveNote,3
 function saveNote(){
   clearTimeout(noteSaveT);
   const n=curNote; if(!n) return;
-  const t=$('n_text').value; if(t===n.text) return;
+  const t=fromEditText($('n_text').value); if(t===n.text) return;
   n.text=t; n.updated_at=nowStamp();
   if(t.trim()) n._new=false;
   n._dirty=!n._new;
@@ -1742,7 +1742,7 @@ async function syncNotes(){
   persistNotes();
   if(curNote && !noteEditing){
     if(curNote._deleted){ hideNed(); }
-    else { $('n_text').value=curNote.text||''; renderReader(); }
+    else { $('n_text').value=toEditText(curNote.text||''); renderReader(); }
   }
 }
 
@@ -1797,6 +1797,14 @@ const FOTO_BUCKET='resep-foto';
 const IMG_RE=/^\s*!\[[^\]]*\]\((https:\/\/[^)\s]+)\)\s*$/;
 const isImgLine=s=>IMG_RE.test(s);
 let fotoPos=null;
+/* Saat Edit, kolom teks hanya bisa menampilkan teks polos. Supaya alamat foto yang panjang
+   tidak terlihat, baris foto ditampilkan sebagai "[Foto 1]", "[Foto 2]", dst., lalu dikembalikan
+   ke alamat aslinya saat disimpan. Menghapus baris "[Foto N]" = membuang foto itu dari resep. */
+let fotoMap=[];
+const FOTO_LBL_RE=/^\s*\[Foto (\d+)\]\s*$/;
+function toEditText(t){ fotoMap=[]; return String(t).split('\n').map(s=>{ const m=s.match(IMG_RE); if(!m) return s; fotoMap.push(m[1]); return '[Foto '+fotoMap.length+']'; }).join('\n'); }
+function fromEditText(v){ return String(v).split('\n').map(s=>{ const m=s.match(FOTO_LBL_RE); const u=m && fotoMap[+m[1]-1]; return u ? '![foto]('+u+')' : s; }).join('\n'); }
+function fotoLabel(url){ fotoMap.push(url); return '[Foto '+fotoMap.length+']'; }
 function pickFoto(){
   if(!sb || !cfg){ toast('Aktifkan sinkron cloud dulu untuk menambah foto',4000); return; }
   if(!navigator.onLine){ toast('Butuh internet untuk menambah foto',4000); return; }
@@ -1832,7 +1840,7 @@ async function onFotoFile(ev){
     const ta=$('n_text'), v=ta.value, p=Math.min(fotoPos==null?v.length:fotoPos, v.length);
     // foto selalu jadi baris sendiri
     const pre=(p>0 && v[p-1]!=='\n')?'\n':'', post=(v[p]!=='\n')?'\n':'';
-    ta.setRangeText(pre+'![foto]('+url+')'+post, p, p, 'end');
+    ta.setRangeText(pre+fotoLabel(url)+post, p, p, 'end');
     fotoPos=ta.selectionStart;
     saveNote(); clearTimeout(notePushT); pushNotesDirty();
     if(!noteEditing) renderReader();
