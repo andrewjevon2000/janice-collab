@@ -123,6 +123,8 @@ select cron.schedule(
    di SQL Editor). Notif harus muncul di HP dalam beberapa detik.
 
 Kalau tes gagal:
+- `"permission denied for table collabs"` → fungsi belum diberi izin membaca tabel. Jalankan di
+  SQL Editor: `grant select, insert, update, delete on table public.collabs to service_role;`
 - Hasil tes `401` → di pengaturan fungsi `notify-h1`, matikan **Verify JWT**, lalu tes lagi.
 - `"sent":0` padahal ada jadwal besok → cek tanggalnya benar-benar besok, dan HP sudah diaktifkan di langkah 5.
 - Untuk mematikan jadwal: `select cron.unschedule('janice-notif-h1');`
