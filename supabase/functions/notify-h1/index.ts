@@ -11,6 +11,9 @@
 //   workspace "<ws>"         = collab
 //   workspace "<ws>::push"   = langganan push per HP (data.sub)
 
+import { createClient } from "npm:@supabase/supabase-js@2";
+import webpush from "npm:web-push@3.6.7";
+
 const TZ = "Asia/Jakarta";
 const STATUSES = ["Brief Received", "Draft Sent", "Approved", "Posted"];
 const STATUS_MIG = {
@@ -64,9 +67,6 @@ export function buildPayload(tasks, day) {
 }
 
 async function handler() {
-  const { createClient } = await import("npm:@supabase/supabase-js@2");
-  const webpush = (await import("npm:web-push@3.6.7")).default;
-
   const pub = Deno.env.get("VAPID_PUBLIC_KEY"), priv = Deno.env.get("VAPID_PRIVATE_KEY");
   if (!pub || !priv) return json({ error: "VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY belum diisi di Secrets" }, 500);
   webpush.setVapidDetails(Deno.env.get("VAPID_SUBJECT") || "https://github.com/andrewjevon2000/janice-collab", pub, priv);
@@ -114,4 +114,11 @@ function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), { status, headers: { "Content-Type": "application/json" } });
 }
 
-if (typeof Deno !== "undefined") Deno.serve(() => handler());
+// Error apa pun dikembalikan sebagai pesan yang terbaca, supaya mudah dicek di hasil Test
+Deno.serve(async () => {
+  try {
+    return await handler();
+  } catch (err) {
+    return json({ error: String((err && err.message) || err) }, 500);
+  }
+});
