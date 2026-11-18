@@ -51,17 +51,25 @@ export function tasksFor(collabs, day) {
   return out.sort((a, b) => order[a.type] - order[b.type]);
 }
 
+/** Kalimat per jenis tugas, dipakai di judul (satu tugas) dan di daftar (beberapa tugas) */
+const PHRASE = {
+  masak: (b) => `masak buat ${b}`,
+  draft: (b) => `kirim draft ke ${b}`,
+  posting: (b) => `posting konten ${b}`,
+};
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
 /** Isi notifikasi: satu tugas = judul spesifik, beberapa tugas = ringkasan per baris */
 export function buildPayload(tasks, day) {
   if (!tasks.length) return null;
   let title, body;
   if (tasks.length === 1) {
     const t = tasks[0];
-    title = `Besok: ${LBL[t.type]} ${t.brand}`;
-    body = t.menu || "Buka app untuk detailnya";
+    title = `Besok ${PHRASE[t.type](t.brand)}`;
+    body = t.menu ? `${t.menu}. Jangan lupa ya, Beb` : "Jangan lupa ya, Beb";
   } else {
-    title = `Besok ada ${tasks.length} jadwal`;
-    body = tasks.map((t) => `${LBL[t.type]} · ${t.brand}`).join("\n");
+    title = `Besok ada ${tasks.length} jadwal, Beb`;
+    body = tasks.map((t) => cap(PHRASE[t.type](t.brand))).join("\n");
   }
   return JSON.stringify({ title, body, url: "./index.html#jadwal", tag: "janice-h1-" + day });
 }
