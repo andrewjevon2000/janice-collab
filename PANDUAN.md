@@ -131,6 +131,32 @@ Kalau tes gagal:
 
 ---
 
+## Langkah 5 — Foto di resep (opsional)
+
+Foto dari galeri dikecilkan otomatis (± 200 KB per foto) lalu disimpan di **Supabase Storage**
+(gratis sampai 1 GB), jadi memori HP dan penyimpanan app tidak terbebani. Butuh Langkah 1–3.
+
+Setup sekali: buka **SQL Editor** → **New query** → tempel SQL di bawah → **Run**.
+
+```sql
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('resep-foto', 'resep-foto', true, 2097152, array['image/jpeg'])
+on conflict (id) do nothing;
+
+create policy "resep foto upload" on storage.objects
+  for insert to anon, authenticated with check (bucket_id = 'resep-foto');
+```
+
+Cara pakai: buka resep → **Edit** → taruh kursor di tempat foto → tap **Foto** → pilih dari galeri.
+Tap foto saat membaca resep untuk melihatnya lebih besar. Menghapus foto: saat **Edit**, hapus baris
+`![foto](https://...)`-nya.
+
+> Catatan: foto bisa dibuka siapa pun yang punya alamat lengkapnya. Alamatnya panjang dan acak,
+> jadi praktis tidak bisa ditebak. Foto yang barisnya dihapus dari resep tetap tersimpan di Storage
+> (bisa dibersihkan manual lewat menu **Storage → resep-foto**).
+
+---
+
 ## 📖 Fitur Resep (catatan ala Notes iPhone)
 
 - Buka tab **Resep** di bawah. Tap tombol **+** (atau **Resep baru**) untuk menulis.

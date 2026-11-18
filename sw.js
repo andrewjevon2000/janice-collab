@@ -4,7 +4,10 @@
    - Aset lain (ikon, manifest): cache-first.
    - Install selalu ambil file segar dari server (cache:'reload'), supaya cache versi baru
      tidak terisi file lama dari HTTP cache browser. */
-const CACHE = 'janice-collab-v14';
+const CACHE = 'janice-collab-v15';
+// Foto resep (Supabase Storage) disimpan di cache terpisah supaya tetap tampil saat offline
+// dan tidak ikut terhapus saat versi app naik.
+const FOTO_CACHE = 'janice-foto';
 const ASSETS = ['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -15,13 +18,21 @@ self.addEventListener('install', e => {
   ));
 });
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE && k!==FOTO_CACHE).map(k=>caches.delete(k)))));
   self.clients.claim();
 });
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // Foto resep: cache-first (nama file selalu unik, jadi isinya tidak pernah berubah)
+  if (url.pathname.includes('/storage/v1/object/public/resep-foto/')) {
+    e.respondWith(caches.open(FOTO_CACHE).then(c => c.match(req).then(hit => hit || fetch(req).then(res => {
+      if (res.ok) c.put(req, res.clone()).catch(()=>{});
+      return res;
+    }))));
+    return;
+  }
   // Jangan cache panggilan ke Supabase / CDN dinamis, selalu ke jaringan.
   if (url.hostname.includes('supabase') || url.hostname.includes('jsdelivr')) return;
   const isPage = req.mode === 'navigate' || url.pathname.endsWith('/') || url.pathname.endsWith('.html');

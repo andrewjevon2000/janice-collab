@@ -410,6 +410,15 @@
   .nread{font-size:15px;line-height:1.55;cursor:text;padding-bottom:40vh}
   .nread h2{font-size:22px;font-weight:600;line-height:1.25;margin-bottom:8px;word-break:break-word}
   .nread p{white-space:pre-wrap;word-break:break-word}
+  .nimg{display:block;width:100%;height:auto;max-height:70vh;object-fit:cover;border-radius:14px;margin:8px 0;background:var(--raised);cursor:zoom-in}
+  .nitem{display:flex;align-items:center;gap:12px}
+  .nitem .nmain{flex:1;min-width:0}
+  .nthumb{flex:none;width:44px;height:44px;border-radius:8px;object-fit:cover;background:var(--raised)}
+  .fotoview{position:fixed;inset:0;z-index:90;background:rgba(15,12,10,.92);display:none;align-items:center;justify-content:center;padding:calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom))}
+  .fotoview.open{display:flex;animation:fade .2s var(--ease)}
+  .fotoview img{max-width:100%;max-height:100%;object-fit:contain;border-radius:8px}
+  .fotoview .iconbtn{position:absolute;top:calc(12px + env(safe-area-inset-top));right:12px;color:#fff;background:rgba(255,255,255,.14)}
+  .nedact{gap:0}
   .nread a{color:var(--blue)}
   .ngap{height:.8em}
   .nempty{color:var(--muted)}
@@ -567,6 +576,7 @@
   <symbol id="i-checks" viewBox="0 0 24 24"><path d="m3 7 2 2 4-4M3 17l2 2 4-4M13 6h8M13 12h8M13 18h8"/></symbol>
   <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></symbol>
   <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
   <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></symbol>
 </svg>
 
@@ -799,6 +809,7 @@
     <button class="nedlink" onclick="closeNote()"><svg class="ic"><use href="#i-chevl"/></svg>Resep</button>
     <div class="nedact">
       <button class="nedlink edit-on" onmousedown="event.preventDefault()" onclick="toggleCkLine()" title="Jadikan baris ini checklist"><svg class="ic"><use href="#i-checks"/></svg>Checklist</button>
+      <button class="nedlink edit-on" onmousedown="event.preventDefault()" onclick="pickFoto()" title="Tambah foto dari galeri"><svg class="ic"><use href="#i-image"/></svg>Foto</button>
       <button class="nedlink read-on" onclick="setNoteMode(true)">Edit</button>
       <button class="nedlink del" onclick="deleteNote()" aria-label="Hapus resep"><svg class="ic"><use href="#i-trash"/></svg></button>
       <button class="nedlink edit-on strong" onclick="doneNote()">Selesai</button>
@@ -811,6 +822,8 @@
   </div>
 </div>
 
+<input type="file" id="fotoFile" accept="image/*" style="display:none" onchange="onFotoFile(event)">
+<div class="fotoview" id="fotoView" onclick="closeFotoView()" role="dialog" aria-label="Foto resep"><img id="fotoViewImg" alt="Foto resep"><button type="button" class="iconbtn" aria-label="Tutup"><svg class="ic"><use href="#i-x"/></svg></button></div>
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
@@ -1494,9 +1507,10 @@ function persistNotes(){ try{ localStorage.setItem(NKEY, JSON.stringify(notes.fi
 let notes=loadNotes(), curNote=null, noteEditing=false, noteSaveT=null, notePushT=null;
 function activeNotes(){ return notes.filter(n=>!n._deleted && !n._new); }
 function stripCk(s){ const m=String(s).match(CK_RE); return m?m[3]:String(s); }
-function noteParts(t){ const L=String(t||'').split('\n'); return {L, ti:L.findIndex(x=>stripCk(x).trim())}; }
+function noteParts(t){ const L=String(t||'').split('\n'); return {L, ti:L.findIndex(x=>stripCk(x).trim() && !isImgLine(x))}; }
+function noteFirstImg(t){ const m=String(t||'').split('\n').map(x=>x.match(IMG_RE)).find(Boolean); return m?m[1]:''; }
 function noteTitle(t){ const {L,ti}=noteParts(t); return ti<0?'Resep baru':stripCk(L[ti]).trim(); }
-function notePreview(t){ const {L,ti}=noteParts(t); if(ti<0) return ''; const nx=L.slice(ti+1).find(x=>stripCk(x).trim()); return nx?stripCk(nx).trim():''; }
+function notePreview(t){ const {L,ti}=noteParts(t); if(ti<0) return ''; const nx=L.slice(ti+1).find(x=>stripCk(x).trim() && !isImgLine(x)); return nx?stripCk(nx).trim():''; }
 function dayDiff(iso){ const d=new Date(iso), t=new Date(); return Math.round((new Date(t.getFullYear(),t.getMonth(),t.getDate())-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/86400000); }
 function nGroup(iso){
   const n=dayDiff(iso), d=new Date(iso);
@@ -1524,7 +1538,8 @@ function renderNotes(){
   list.forEach(n=>{
     const gg=nGroup(n.updated_at);
     if(gg!==g){ if(g) html+='</div>'; html+=`<div class="ngrp">${gg}</div><div class="nlist">`; g=gg; }
-    html+=`<div class="nitem" onclick="openNote('${esc(n.id)}')"><b>${esc(noteTitle(n.text))}</b><div class="nprev"><time>${nTime(n.updated_at)}</time>${esc(notePreview(n.text)||'Tidak ada teks tambahan')}</div></div>`;
+    const th=noteFirstImg(n.text);
+    html+=`<div class="nitem" onclick="openNote('${esc(n.id)}')"><div class="nmain"><b>${esc(noteTitle(n.text))}</b><div class="nprev"><time>${nTime(n.updated_at)}</time>${esc(notePreview(n.text)||'Tidak ada teks tambahan')}</div></div>${th?`<img class="nthumb" src="${esc(th)}" alt="" loading="lazy" crossorigin="anonymous">`:''}</div>`;
   });
   box.innerHTML=html+'</div>';
 }
@@ -1559,6 +1574,7 @@ function renderReader(){
     const s=L[i], m=s.match(CK_RE);
     if(m) h+=`<div class="ck${m[2]==='✓'?' done':''}" data-i="${i}" style="margin-left:${Math.min(m[1].length,8)*6}px"><span class="ckbox">${ic('check')}</span><span class="cktxt">${linkify(esc(m[3]))||'&nbsp;'}</span></div>`;
     else if(!s.trim()) h+='<div class="ngap"></div>';
+    else if(isImgLine(s)) h+=`<img class="nimg" data-i="${i}" src="${esc(s.match(IMG_RE)[1])}" alt="Foto resep" loading="lazy" crossorigin="anonymous">`;
     else h+=`<p data-i="${i}">${linkify(esc(s))}</p>`;
   }
   $('nRead').innerHTML=h;
@@ -1630,6 +1646,7 @@ function onNoteKey(ev){
 }
 function onReaderClick(ev){
   if(ev.target.closest('a')) return;
+  const im=ev.target.closest('.nimg'); if(im){ openFotoView(im.src); return; }
   if(ev.target.closest('.nreset')){ resetChecks(); return; }
   const ck=ev.target.closest('.ck'); if(ck){ toggleCheck(+ck.dataset.i); return; }
   const ln=ev.target.closest('[data-i]');
@@ -1770,6 +1787,64 @@ window.addEventListener('offline',()=>{ if(sb) setSync('off','Offline — peruba
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && sb && navigator.onLine) syncNow(true); });
 setInterval(()=>{ if(sb && navigator.onLine && document.visibilityState==='visible' && Date.now()-lastSync>40000) syncNow(true); }, 45000);
 
+/* ================= FOTO DI RESEP =================
+   - Foto dari galeri dikecilkan dulu (sisi terpanjang 1600px, JPEG ±200 KB),
+     lalu diunggah ke Supabase Storage, bucket "resep-foto" (lihat PANDUAN.md langkah 5).
+   - Di teks resep, foto disimpan sebagai satu baris: ![foto](https://...)
+     Jadi ikut tersinkron seperti teks biasa, dan penyimpanan lokal (±5 MB) tidak terbebani.
+   - Nama folder memakai hash workspace, bukan workspace-nya, karena alamat foto bersifat publik. */
+const FOTO_BUCKET='resep-foto';
+const IMG_RE=/^\s*!\[[^\]]*\]\((https:\/\/[^)\s]+)\)\s*$/;
+const isImgLine=s=>IMG_RE.test(s);
+let fotoPos=null;
+function pickFoto(){
+  if(!sb || !cfg){ toast('Aktifkan sinkron cloud dulu untuk menambah foto',4000); return; }
+  if(!navigator.onLine){ toast('Butuh internet untuk menambah foto',4000); return; }
+  const ta=$('n_text'); fotoPos=ta.selectionStart;
+  $('fotoFile').click();
+}
+async function shrinkImage(file){
+  let src;
+  try{ src=await createImageBitmap(file,{imageOrientation:'from-image'}); }
+  catch(e){ src=await new Promise((ok,no)=>{ const im=new Image(); im.onload=()=>ok(im); im.onerror=()=>no(new Error('Foto tidak bisa dibaca')); im.src=URL.createObjectURL(file); }); }
+  const w=src.width||src.naturalWidth, h=src.height||src.naturalHeight, k=Math.min(1,1600/Math.max(w,h));
+  const cv=document.createElement('canvas'); cv.width=Math.round(w*k); cv.height=Math.round(h*k);
+  const cx=cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(src,0,0,cv.width,cv.height);
+  const toBlob=q=>new Promise(r=>cv.toBlob(r,'image/jpeg',q));
+  let b=await toBlob(.8); if(b && b.size>900*1024) b=await toBlob(.6);
+  if(!b) throw new Error('Foto gagal dikecilkan');
+  return b;
+}
+async function wsHash(){ const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(cfg.ws)); return [...new Uint8Array(h)].slice(0,8).map(x=>x.toString(16).padStart(2,'0')).join(''); }
+async function onFotoFile(ev){
+  const file=ev.target.files[0]; ev.target.value='';
+  if(!file || !curNote) return;
+  if(!/^image\//.test(file.type)){ toast('File harus berupa foto'); return; }
+  const note=curNote;
+  toast('Mengunggah foto…',30000);
+  try{
+    const blob=await shrinkImage(file);
+    const path=(await wsHash())+'/'+note.id+'/'+Date.now().toString(36)+Math.random().toString(36).slice(2,6)+'.jpg';
+    const {error}=await sb.storage.from(FOTO_BUCKET).upload(path,blob,{contentType:'image/jpeg',cacheControl:'31536000',upsert:false});
+    if(error) throw error;
+    const url=sb.storage.from(FOTO_BUCKET).getPublicUrl(path).data.publicUrl;
+    if(curNote!==note){ toast('Resep sudah ditutup, foto tidak dimasukkan',4000); return; }
+    const ta=$('n_text'), v=ta.value, p=Math.min(fotoPos==null?v.length:fotoPos, v.length);
+    // foto selalu jadi baris sendiri
+    const pre=(p>0 && v[p-1]!=='\n')?'\n':'', post=(v[p]!=='\n')?'\n':'';
+    ta.setRangeText(pre+'![foto]('+url+')'+post, p, p, 'end');
+    fotoPos=ta.selectionStart;
+    saveNote(); clearTimeout(notePushT); pushNotesDirty();
+    if(!noteEditing) renderReader();
+    toast('Foto ditambahkan');
+  }catch(e){
+    const m=String((e&&e.message)||e);
+    toast(/bucket|not found|row-level|policy|Unauthorized/i.test(m)?'Tempat foto di Supabase belum disiapkan (PANDUAN langkah 5)':'Gagal menambah foto: '+m,6000);
+  }
+}
+function openFotoView(url){ $('fotoViewImg').src=url; $('fotoView').classList.add('open'); }
+function closeFotoView(){ $('fotoView').classList.remove('open'); $('fotoViewImg').removeAttribute('src'); }
+
 /* ================= NOTIFIKASI H-1 (Web Push lewat Supabase) =================
    - HP mendaftar push lalu menyimpan langganannya ke tabel `collabs` yang sama,
      workspace "<workspace>::push" (tidak perlu SQL tabel baru).
@@ -1839,7 +1914,7 @@ render();
 initCloud();
 { const d=new Date(); $('todayLbl').textContent=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][d.getDay()]+', '+d.getDate()+' '+MONTHS_ID[d.getMonth()]+' '+d.getFullYear(); }
 $('cfOk').addEventListener('click',()=>{ const fn=cfFn; closeConfirm(); if(fn) fn(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if($('cfOverlay').classList.contains('open')){ closeConfirm(); return; } if(curNote){ closeNote(); return; } closeModal(); closeSettings(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ if($('fotoView').classList.contains('open')){ closeFotoView(); return; } if($('cfOverlay').classList.contains('open')){ closeConfirm(); return; } if(curNote){ closeNote(); return; } closeModal(); closeSettings(); } });
 $('n_text').addEventListener('keydown',onNoteKey);
 // kunci zoom: pinch (gesture* khusus Safari iOS) dan pinch multi-jari
 ['gesturestart','gesturechange','gestureend'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
