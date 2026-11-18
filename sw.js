@@ -4,7 +4,7 @@
    - Aset lain (ikon, manifest): cache-first.
    - Install selalu ambil file segar dari server (cache:'reload'), supaya cache versi baru
      tidak terisi file lama dari HTTP cache browser. */
-const CACHE = 'janice-collab-v13';
+const CACHE = 'janice-collab-v14';
 const ASSETS = ['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png'];
 self.addEventListener('install', e => {
   self.skipWaiting();
@@ -40,4 +40,31 @@ self.addEventListener('fetch', e => {
       return res;
     }).catch(() => caches.match('./index.html')))
   );
+});
+
+/* Notifikasi H-1: dikirim fungsi Supabase `notify-h1` (lihat PANDUAN.md langkah 4).
+   Isi push berupa JSON {title, body, url, tag}. */
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'Jadwal besok', {
+    body: d.body || 'Buka app untuk melihat jadwal',
+    icon: 'icon-192.png',
+    badge: 'icon-192.png',
+    tag: d.tag || 'janice-h1',
+    data: { url: d.url || './index.html#jadwal' }
+  }));
+});
+/* Tap notifikasi: fokus ke app yang sudah terbuka, atau buka app di tab Jadwal */
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || './index.html#jadwal', self.registration.scope).href;
+  e.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) {
+      if (c.url.startsWith(self.registration.scope) && 'focus' in c) {
+        return ('navigate' in c ? c.navigate(url) : Promise.resolve(c)).then(w => (w || c).focus());
+      }
+    }
+    return clients.openWindow(url);
+  }));
 });

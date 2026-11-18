@@ -367,6 +367,11 @@
   .morelist .ic:last-child{color:var(--muted);margin-left:auto}
   .morelist .txt{flex:1;min-width:0;font-size:14px;font-weight:500}
   .morelist .sub{display:block;font-size:12px;color:var(--muted);font-weight:400}
+  .notifRow.on > .ic:first-child{color:var(--green)}
+  .notifbox{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;border:1px solid var(--line2);border-radius:var(--r);background:var(--card);padding:8px 12px;text-align:left;margin-bottom:16px}
+  .notifbox .txt{flex:1;min-width:0;font-size:14px;font-weight:500}
+  .notifbox .sub{display:block;font-size:12px;color:var(--muted);font-weight:400}
+  .notifbox.on{border-color:var(--green);background:var(--green-soft)}
 
   /* ===== resep (notes) ===== */
   #secResep{display:none}
@@ -561,6 +566,7 @@
   <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></symbol>
   <symbol id="i-checks" viewBox="0 0 24 24"><path d="m3 7 2 2 4-4M3 17l2 2 4-4M13 6h8M13 12h8M13 18h8"/></symbol>
   <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
   <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16"/></symbol>
 </svg>
 
@@ -664,6 +670,7 @@
 <section id="secMore">
   <h2 class="sectitle">Lainnya</h2>
   <div class="card morelist">
+    <button class="notifRow" onclick="toggleNotif()"><svg class="ic"><use href="#i-bell"/></svg><span class="txt"><span class="notifLbl">Aktifkan notifikasi H-1</span><span class="sub notifSub">Ingatkan jadwal sehari sebelumnya, jam 12.00</span></span><svg class="ic sm"><use href="#i-chev"/></svg></button>
     <button onclick="openSettings()"><svg class="ic"><use href="#i-cloud"/></svg><span class="txt">Sinkron cloud<span class="sub">Atur koneksi Supabase dan workspace</span></span><svg class="ic sm"><use href="#i-chev"/></svg></button>
     <button onclick="syncNow()"><svg class="ic"><use href="#i-sync"/></svg><span class="txt">Sync sekarang<span class="sub">Tarik dan kirim data terbaru</span></span><svg class="ic sm"><use href="#i-chev"/></svg></button>
     <button onclick="exportCSV()"><svg class="ic"><use href="#i-down"/></svg><span class="txt">Export CSV<span class="sub">Unduh semua collab untuk Excel atau arsip</span></span><svg class="ic sm"><use href="#i-chev"/></svg></button>
@@ -762,6 +769,7 @@
       <div class="field"><label for="s_url">Project URL</label><input id="s_url" placeholder="https://xxxx.supabase.co" autocapitalize="off" autocorrect="off" spellcheck="false"></div>
       <div class="field"><label for="s_key">Anon / public key</label><input id="s_key" placeholder="eyJhbGci..." autocapitalize="off" autocorrect="off" spellcheck="false"></div>
       <div class="field"><label for="s_ws">Workspace (kata sandi rahasia kamu)</label><input id="s_ws" placeholder="mis. janice-2026-rahasia" autocapitalize="off" autocorrect="off" spellcheck="false"><span class="ferr" id="e_cloud" hidden>URL, key, dan workspace wajib diisi</span></div>
+      <button type="button" class="notifRow notifbox" onclick="toggleNotif()"><svg class="ic"><use href="#i-bell"/></svg><span class="txt"><span class="notifLbl">Aktifkan notifikasi H-1</span><span class="sub notifSub"></span></span></button>
       <p class="note warn" style="margin-bottom:0">Siapa pun yang punya URL, key, dan workspace ini bisa membaca dan menulis datamu. Jangan dibagikan.</p>
     </div>
     <div class="mfoot">
@@ -1651,7 +1659,7 @@ function initCloud(){
     setSync('', 'Cloud belum diatur, data tersimpan di perangkat ini. Tap untuk mengatur sinkron');
   }
 }
-function openSettings(){ $('s_url').value=cfg?.url||''; $('s_key').value=cfg?.key||''; $('s_ws').value=cfg?.ws||''; $('e_cloud').hidden=true; showOverlay('setOverlay'); }
+function openSettings(){ $('s_url').value=cfg?.url||''; $('s_key').value=cfg?.key||''; $('s_ws').value=cfg?.ws||''; $('e_cloud').hidden=true; renderNotifRow(); showOverlay('setOverlay'); }
 function closeSettings(){ hideOverlay('setOverlay'); }
 function connectCloud(){
   const url=cleanUrl($('s_url').value), key=$('s_key').value.trim(), ws=$('s_ws').value.trim();
@@ -1750,6 +1758,7 @@ async function syncNow(silent){
     await syncNotes();
     persist(); render();
     lastSync=Date.now();
+    renderNotifRow(); refreshPushRow();
     setSync('on','Tersinkron · '+new Date().toLocaleTimeString('id-ID'));
   }catch(e){ setSync('off','Gagal sync: '+(e.message||e)+' , cek config atau SQL'); }
   finally{ syncing=false; }
@@ -1760,6 +1769,64 @@ window.addEventListener('offline',()=>{ if(sb) setSync('off','Offline — peruba
 // Auto-sync: saat app dibuka/kembali fokus, dan berkala tiap 45 detik (senyap).
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && sb && navigator.onLine) syncNow(true); });
 setInterval(()=>{ if(sb && navigator.onLine && document.visibilityState==='visible' && Date.now()-lastSync>40000) syncNow(true); }, 45000);
+
+/* ================= NOTIFIKASI H-1 (Web Push lewat Supabase) =================
+   - HP mendaftar push lalu menyimpan langganannya ke tabel `collabs` yang sama,
+     workspace "<workspace>::push" (tidak perlu SQL tabel baru).
+   - Fungsi Supabase `notify-h1` jalan tiap hari jam 12.00 WIB, mencari jadwal besok,
+     dan mengirim notif ke semua HP di workspace itu. Lihat PANDUAN.md langkah 4.
+   - Kunci publik VAPID memang publik; kunci privatnya hanya disimpan di Supabase. */
+const VAPID_PUBLIC='BHRseOWYVJNKq7yAY96rA4kUz1n3Cclqt1_UhWtnqTNUWZMwvJsm8Ebytumg8yJFKXJBrVpVWtgJuNWtahDctvk';
+const isIOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
+function pushSupported(){ return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window; }
+function b64uToU8(s){ const b=atob((s+'='.repeat((4-s.length%4)%4)).replace(/-/g,'+').replace(/_/g,'/')); return Uint8Array.from(b,c=>c.charCodeAt(0)); }
+async function subId(endpoint){ const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(endpoint)); return 'p'+[...new Uint8Array(h)].slice(0,12).map(x=>x.toString(16).padStart(2,'0')).join(''); }
+async function currentSub(){ if(!pushSupported()) return null; try{ const reg=await navigator.serviceWorker.getRegistration(); return reg ? await reg.pushManager.getSubscription() : null; }catch(e){ return null; } }
+async function notifState(){
+  if(isIOS() && !isStandalone()) return ['ios','Tambahkan app ke Home Screen dulu, lalu buka dari ikonnya'];
+  if(!pushSupported()) return ['na','Browser ini belum mendukung notifikasi'];
+  if(Notification.permission==='denied') return ['denied','Izin ditolak. Aktifkan notifikasi app ini di pengaturan HP'];
+  if(await currentSub()) return ['on','Aktif · jam 12.00, sehari sebelum jadwal'];
+  if(!sb) return ['nocloud','Butuh sinkron cloud yang aktif'];
+  return ['off','Ingatkan jadwal sehari sebelumnya, jam 12.00'];
+}
+async function renderNotifRow(){
+  const [st,txt]=await notifState();
+  document.querySelectorAll('.notifSub').forEach(el=>el.textContent=txt);
+  document.querySelectorAll('.notifLbl').forEach(el=>el.textContent=st==='on'?'Notifikasi H-1 aktif':'Aktifkan notifikasi H-1');
+  document.querySelectorAll('.notifRow').forEach(el=>el.classList.toggle('on',st==='on'));
+}
+async function savePushRow(sub, deleted){
+  const id=await subId(sub.endpoint);
+  const {error}=await sb.from('collabs').upsert({id, workspace:cfg.ws+'::push', data:deleted?{}:{sub:sub.toJSON(), ua:navigator.userAgent.slice(0,160)}, updated_at:nowStamp(), deleted:!!deleted},{onConflict:'id'});
+  if(error) throw error;
+}
+async function toggleNotif(){
+  const [st,txt]=await notifState();
+  if(st==='ios' || st==='na' || st==='denied'){ toast(txt,5000); return; }
+  if(st==='on'){
+    askConfirm('Matikan notifikasi H-1?','HP ini tidak akan menerima pengingat jadwal lagi.','Matikan', async()=>{
+      const sub=await currentSub();
+      try{ if(sb && sub) await savePushRow(sub,true); }catch(e){}
+      try{ if(sub) await sub.unsubscribe(); }catch(e){}
+      renderNotifRow(); toast('Notifikasi H-1 dimatikan');
+    });
+    return;
+  }
+  if(st==='nocloud'){ toast('Aktifkan sinkron cloud dulu',4000); openSettings(); return; }
+  const perm=await Notification.requestPermission();
+  if(perm!=='granted'){ renderNotifRow(); toast('Izin notifikasi tidak diberikan',4000); return; }
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    const sub=await reg.pushManager.subscribe({userVisibleOnly:true, applicationServerKey:b64uToU8(VAPID_PUBLIC)});
+    await savePushRow(sub,false);
+    renderNotifRow();
+    reg.showNotification('Notifikasi H-1 aktif',{body:'Pengingat jadwal akan muncul jam 12.00, sehari sebelumnya',icon:'icon-192.png',tag:'janice-test'});
+  }catch(e){ renderNotifRow(); toast('Gagal mengaktifkan notifikasi: '+(e.message||e),6000); }
+}
+/* langganan push bisa diperbarui browser diam-diam; simpan ulang tiap sinkron supaya cloud punya yang terbaru */
+async function refreshPushRow(){ if(!sb || !cfg) return; const sub=await currentSub(); if(sub){ try{ await savePushRow(sub,false); }catch(e){} } }
 
 /* ================= PWA ================= */
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
@@ -1784,6 +1851,9 @@ const flushNote=()=>{ if(curNote){ saveNote(); pushNotesDirty(); } };
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden'){ flushNote(); if(feeShown){ feeShown=false; render(); } } });
 window.addEventListener('pagehide',flushNote);
 $('m_brand').addEventListener('input',()=>{ $('e_brand').hidden=true; });
+renderNotifRow();
+// dibuka dari notifikasi: langsung ke Jadwal
+if(location.hash==='#jadwal'){ if(isMobile()) setTab('jadwal'); else setView('cal'); history.replaceState(null,'',location.pathname); }
 ['m_brand','m_produk','m_ksp','m_menu','m_masak','m_draft','m_approval','m_posting'].forEach(id=>$(id).addEventListener('input',updateDots));
 window.matchMedia('(max-width:760px)').addEventListener('change',()=>{ applyVisibility(); });
 </script>

@@ -79,6 +79,56 @@ Ulangi Langkah 3 di perangkat lain (laptop/HP kedua) dengan **URL, Key, dan Work
 
 ---
 
+## Langkah 4 — Notifikasi H-1 di HP (opsional)
+
+App mengirim notifikasi jam **12.00 WIB**, sehari sebelum setiap jadwal masak, kirim draft,
+atau posting. Tugas yang sudah beres tidak diingatkan. Butuh Langkah 1–3 sudah jalan.
+Setup sekali ± 15 menit, semuanya di dashboard Supabase.
+
+**Siapkan kunci VAPID.** Kunci ini untuk mengirim push. Isinya ada di file `vapid-keys.txt` yang
+dibuat saat fitur ini dipasang (tidak ikut di GitHub). Kalau perlu membuat yang baru, jalankan
+`npx web-push generate-vapid-keys`, lalu ganti juga nilai `VAPID_PUBLIC` di `index.html`.
+
+1. **Aktifkan ekstensi.** Menu kiri **Database → Extensions** → cari dan nyalakan **pg_cron** dan **pg_net**.
+2. **Buat fungsinya.** Menu kiri **Edge Functions** → **Deploy a new function** → **Via Editor**.
+   - Nama fungsi: `notify-h1`
+   - Hapus isi contoh, tempel seluruh isi file `supabase/functions/notify-h1/index.ts` → **Deploy**.
+3. **Isi secrets.** Masih di **Edge Functions** → **Secrets** → tambahkan tiga nilai dari `vapid-keys.txt`:
+   `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, dan `VAPID_SUBJECT`.
+4. **Jadwalkan tiap hari jam 12.00 WIB.** Buka **SQL Editor** → **New query** → tempel SQL di bawah,
+   ganti `PROJECT-REF` (bagian depan Project URL, mis. `abcdxyz`) dan `ANON-KEY` (key `eyJ...` dari
+   Langkah 1) → **Run**.
+
+```sql
+select cron.schedule(
+  'janice-notif-h1',
+  '0 5 * * *',  -- 05.00 UTC = 12.00 WIB
+  $$
+  select net.http_post(
+    url     := 'https://PROJECT-REF.supabase.co/functions/v1/notify-h1',
+    headers := jsonb_build_object('Content-Type','application/json','Authorization','Bearer ANON-KEY'),
+    body    := '{}'::jsonb
+  );
+  $$
+);
+```
+
+5. **Nyalakan di HP.** Buka app → tab **Lainnya** → **Aktifkan notifikasi H-1** → **Izinkan**.
+   Notif "Notifikasi H-1 aktif" langsung muncul sebagai tanda berhasil. Ulangi di setiap HP yang
+   ingin diingatkan (laptop: lewat tombol **Cloud**).
+   - **iPhone:** wajib iOS 16.4 ke atas, dan app harus dibuka dari ikon Home Screen (Langkah 2),
+     bukan dari Safari.
+6. **Tes kirim sekarang.** Buat collab dengan tanggal masak/draft/posting **besok**, lalu di
+   **Edge Functions → notify-h1** klik **Test** (atau jalankan isi `select net.http_post(...)` di atas
+   di SQL Editor). Notif harus muncul di HP dalam beberapa detik.
+
+Kalau tes gagal:
+- Hasil tes `401` → di pengaturan fungsi `notify-h1`, matikan **Verify JWT**, lalu tes lagi.
+- `"sent":0` padahal ada jadwal besok → cek tanggalnya benar-benar besok, dan HP sudah diaktifkan di langkah 5.
+- Untuk mematikan jadwal: `select cron.unschedule('janice-notif-h1');`
+
+---
+
 ## 📖 Fitur Resep (catatan ala Notes iPhone)
 
 - Buka tab **Resep** di bawah. Tap tombol **+** (atau **Resep baru**) untuk menulis.
